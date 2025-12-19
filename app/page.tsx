@@ -3,10 +3,13 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Menu, ShoppingBag, X } from "lucide-react";
 import Link from "next/link";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { saveOrder } from "@/app/actions";
 
 // Types for State
 type AppView = "home" | "wizard" | "contact";
 type WizardState = {
+  id?: string;
   category: string;
   occasion: string;
   style: string;
@@ -14,6 +17,13 @@ type WizardState = {
   message: string;
   date: string;
   slot: string;
+};
+
+// Paypal Options
+const initialOptions = {
+    clientId: "test", // Remplacer par "sb" ou votre vrai Client ID
+    currency: "EUR", // PayPal ne gère pas toujours le MAD nativement en test, EUR est plus sûr
+    intent: "capture",
 };
 
 export default function HadilikeApp() {
@@ -35,6 +45,17 @@ export default function HadilikeApp() {
     date: "",
     slot: "",
   });
+
+  const [cart, setCart] = useState<WizardState[]>([]);
+
+  // --- Helpers ---
+  const parsePrice = (priceStr: string) => {
+    return parseInt(priceStr.replace(/\D/g, ""), 10);
+  };
+
+  const calculateTotal = () => {
+    return cart.reduce((acc, item) => acc + parsePrice(item.budget), 0);
+  };
 
   // --- Actions ---
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -74,7 +95,7 @@ export default function HadilikeApp() {
     setTimeout(() => {
       setView(newView);
       setIsAnimationPlaying(false);
-    }, 100); // Small delay for smooth transition feel
+    }, 100); 
   };
 
   const nextStep = () => {
@@ -88,7 +109,23 @@ export default function HadilikeApp() {
 
   const updateOrder = (key: keyof WizardState, value: string) => {
     setOrder((prev) => ({ ...prev, [key]: value }));
-    nextStep(); // Auto advance on selection
+    nextStep();
+  };
+
+  const addToCart = () => {
+    const newOrder = { 
+        ...order, 
+        id: `HDL-${Math.floor(Math.random() * 10000)}` 
+    };
+    setCart([...cart, newOrder]);
+    resetApp(); // Retourne à l'accueil et reset le wizard
+    setIsCartOpen(true); // Ouvre le panier pour confirmation
+  };
+
+  const removeFromCart = (index: number) => {
+    const newCart = [...cart];
+    newCart.splice(index, 1);
+    setCart(newCart);
   };
 
   // --- Logic for Date Restriction (14h rule) ---
@@ -114,7 +151,7 @@ export default function HadilikeApp() {
   };
 
   return (
-    <>
+    <PayPalScriptProvider options={initialOptions}>
       {/* === MENU DRAWER === */}
       <div 
         className={`fixed inset-0 z-[60] transform transition-transform duration-500 ease-in-out ${
@@ -154,36 +191,93 @@ export default function HadilikeApp() {
         }`}
       >
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={toggleCart}></div>
-        <div className="absolute right-0 w-3/4 max-w-sm h-full bg-white shadow-2xl p-8 flex flex-col">
-          <div className="flex justify-between items-center mb-12">
+        <div className="absolute right-0 w-3/4 max-w-sm h-full bg-white shadow-2xl p-8 flex flex-col overflow-y-auto">
+          <div className="flex justify-between items-center mb-8">
             <h2 className="font-serif text-2xl font-bold tracking-wider">PANIER</h2>
             <button onClick={toggleCart} className="text-stone-400 hover:text-black">
               <X className="w-6 h-6" />
             </button>
           </div>
           
-          <div className="flex-grow flex flex-col items-center justify-center text-center space-y-4">
-            <ShoppingBag className="w-12 h-12 text-stone-200" />
-            <p className="font-serif text-lg text-stone-500">Votre panier est vide</p>
-            <p className="text-xs text-stone-400 uppercase tracking-widest px-8">
-              Parcourez nos créations pour trouver le bouquet idéal.
-            </p>
-            <button 
-              onClick={() => { toggleCart(); resetApp(); }}
-              className="mt-6 px-8 py-3 border border-brand-black text-xs uppercase tracking-[0.2em] hover:bg-brand-black hover:text-white transition"
-            >
-              Découvrir
-            </button>
-          </div>
-          
-          <div className="pt-8 border-t border-stone-100">
-            <div className="flex justify-between text-sm uppercase tracking-widest mb-4">
-              <span>Total</span>
-              <span className="font-bold">0 dh</span>
+          {cart.length === 0 ? (
+            <div className="flex-grow flex flex-col items-center justify-center text-center space-y-4">
+                <ShoppingBag className="w-12 h-12 text-stone-200" />
+                <p className="font-serif text-lg text-stone-500">Votre panier est vide</p>
+                <p className="text-xs text-stone-400 uppercase tracking-widest px-8">
+                Parcourez nos créations pour trouver le bouquet idéal.
+                </p>
+                <button 
+                onClick={() => { toggleCart(); resetApp(); }}
+                className="mt-6 px-8 py-3 border border-brand-black text-xs uppercase tracking-[0.2em] hover:bg-brand-black hover:text-white transition"
+                >
+                Découvrir
+                </button>
             </div>
-            <button disabled className="w-full py-4 bg-stone-100 text-stone-400 uppercase tracking-widest text-xs cursor-not-allowed">
-              Commander
-            </button>
+          ) : (
+            <div className="flex-grow space-y-6">
+                {cart.map((item, index) => (
+                    <div key={index} className="flex justify-between border-b border-stone-100 pb-4">
+                        <div>
+                            <p className="font-serif font-bold">{item.category}</p>
+                            <p className="text-xs text-stone-500">{item.occasion} • {item.style}</p>
+                            <p className="text-xs text-stone-400 mt-1">{item.date} ({item.slot})</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="font-bold mb-2">{item.budget}</p>
+                            <button onClick={() => removeFromCart(index)} className="text-xs text-red-400 hover:text-red-600 underline">Retirer</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+          )}
+          
+          <div className="pt-8 border-t border-stone-100 mt-auto">
+            <div className="flex justify-between text-sm uppercase tracking-widest mb-6">
+              <span>Total</span>
+              <span className="font-bold">{calculateTotal()} DH</span>
+            </div>
+            
+            {cart.length > 0 && (
+                <div className="w-full">
+                     <PayPalButtons 
+                        style={{ layout: "vertical", shape: "rect" }}
+                        createOrder={(data, actions) => {
+                            // Convertir DH en EUR approximativement pour le test (1 DH = 0.1 EUR) ou garder en valeur numérique simple
+                            const totalAmount = calculateTotal();
+                            return actions.order.create({
+                                intent: "CAPTURE", // Required for V2
+                                purchase_units: [
+                                    {
+                                        description: "Commande Hadilike Fleurs",
+                                        amount: {
+                                            currency_code: "EUR",
+                                            value: (totalAmount * 0.1).toFixed(2) // Conversion fictive pour test
+                                        },
+                                    },
+                                ],
+                            });
+                        }}
+                        onApprove={async (data, actions) => {
+                            if (actions.order) {
+                                const details = await actions.order.capture();
+                                const orderData = {
+                                    paypalId: details.id,
+                                    cart: cart,
+                                    total: calculateTotal(),
+                                    customer: details.payer
+                                };
+                                
+                                // Sauvegarde locale via Server Action
+                                await saveOrder(orderData);
+                                
+                                alert(`Merci ${details.payer.name?.given_name}! Commande validée.`);
+                                setCart([]); // Vider le panier
+                                toggleCart(); // Fermer le panier
+                            }
+                        }}
+                     />
+                </div>
+            )}
           </div>
         </div>
       </div>
@@ -200,7 +294,11 @@ export default function HadilikeApp() {
 
           <button onClick={toggleCart} className="text-brand-black hover:text-stone-600 transition relative">
             <ShoppingBag className="w-6 h-6" />
-            <span className="absolute -top-1 -right-1 bg-brand-black text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
+            {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-brand-black text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center">
+                    {cart.length}
+                </span>
+            )}
           </button>
         </div>
       </header>
@@ -522,12 +620,10 @@ export default function HadilikeApp() {
                 </div>
 
                 <button
-                  onClick={() =>
-                    alert("Commande simulée ! Redirection vers paiement...")
-                  }
+                  onClick={addToCart}
                   className="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition shadow-lg"
                 >
-                  Commander ({order.budget})
+                  Ajouter au Panier ({order.budget})
                 </button>
               </div>
             )}
@@ -581,6 +677,6 @@ export default function HadilikeApp() {
           </div>
         )}
       </main>
-    </>
+    </PayPalScriptProvider>
   );
 }
