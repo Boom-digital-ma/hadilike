@@ -38,12 +38,10 @@ export default function Chatbot() {
   }, [messages, isOpen]);
 
   const handleOptionClick = (action: string, label: string) => {
-    // Add user selection
     const userMsg: Message = { id: Date.now(), text: label, isUser: true };
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    // Simulate bot response delay
     setTimeout(() => {
       let botResponse: Message;
 
@@ -116,7 +114,7 @@ export default function Chatbot() {
           window.location.href = "/contact";
           return; 
         case "shop_link":
-          window.location.href = "/collections/bouquets";
+          window.location.href = "/";
           return;
         default:
           botResponse = {
@@ -138,15 +136,15 @@ export default function Chatbot() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 flex items-center gap-2 group ${
-          isOpen ? "bg-stone-800 rotate-90" : "bg-primary"
+          isOpen ? "bg-white border border-stone-200 rotate-90" : "bg-white border border-stone-200"
         }`}
       >
         {isOpen ? (
-          <X className="w-6 h-6 text-white" />
+          <X className="w-6 h-6 text-black" />
         ) : (
           <>
-            <MessageCircle className="w-6 h-6 text-secondary group-hover:text-white transition-colors" />
-            <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 text-white font-serif text-sm whitespace-nowrap">
+            <MessageCircle className="w-6 h-6 text-black transition-colors" />
+            <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 text-black font-serif text-sm whitespace-nowrap">
               Conciergerie
             </span>
           </>
@@ -155,21 +153,26 @@ export default function Chatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[350px] md:w-[400px] h-[500px] bg-stone-900/95 backdrop-blur-md border border-stone-700 rounded-lg shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <div className="fixed inset-0 md:inset-auto md:bottom-24 md:right-6 z-50 w-full h-full md:w-[400px] md:h-[600px] bg-white md:border md:border-stone-200 md:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
           
           {/* Header */}
-          <div className="p-4 border-b border-stone-800 bg-black/40 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center border border-secondary/30">
-              <Sparkles className="w-5 h-5 text-secondary" />
+          <div className="p-6 border-b border-stone-100 bg-white flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-stone-50 flex items-center justify-center border border-stone-100">
+                <Sparkles className="w-6 h-6 text-stone-800" />
+              </div>
+              <div>
+                <h3 className="text-black font-serif text-xl tracking-wide">Conciergerie</h3>
+                <p className="text-stone-400 text-[10px] uppercase tracking-[0.2em] font-bold">Hadilike Marrakech</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-white font-serif text-lg tracking-wide">Conciergerie</h3>
-              <p className="text-stone-400 text-xs uppercase tracking-widest">Hadilike.ma</p>
-            </div>
+            <button onClick={() => setIsOpen(false)} className="text-stone-400 p-2 hover:text-black transition-colors">
+              <X className="w-6 h-6" />
+            </button>
           </div>
 
           {/* Messages Body */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-stone-700 scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-brand-bg/30">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -178,8 +181,8 @@ export default function Chatbot() {
                 <div
                   className={`max-w-[85%] p-4 text-sm leading-relaxed ${
                     msg.isUser
-                      ? "bg-secondary text-primary rounded-t-xl rounded-bl-xl"
-                      : "bg-stone-800 text-stone-200 rounded-t-xl rounded-br-xl border border-stone-700"
+                      ? "bg-black text-white rounded-2xl rounded-tr-none shadow-sm"
+                      : "bg-white text-stone-700 rounded-2xl rounded-tl-none border border-stone-100 shadow-sm font-serif italic"
                   }`}
                 >
                   {msg.text}
@@ -187,12 +190,12 @@ export default function Chatbot() {
                 
                 {/* Options Buttons */}
                 {!msg.isUser && msg.options && (
-                  <div className="mt-3 flex flex-wrap gap-2 animate-in fade-in zoom-in duration-300">
+                  <div className="mt-4 flex flex-wrap gap-2 animate-in fade-in zoom-in duration-500">
                     {msg.options.map((opt, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleOptionClick(opt.action, opt.label)}
-                        className="text-xs border border-stone-600 text-stone-300 px-3 py-2 rounded-full hover:bg-white hover:text-black hover:border-white transition-all duration-300 uppercase tracking-wider"
+                        className="text-[10px] border border-stone-200 text-stone-500 px-4 py-2 rounded-full hover:bg-black hover:text-white hover:border-black transition-all duration-300 uppercase tracking-widest font-bold"
                       >
                         {opt.label}
                       </button>
@@ -202,30 +205,30 @@ export default function Chatbot() {
               </div>
             ))}
             {isTyping && (
-              <div className="flex items-center gap-2 p-2 text-stone-500 text-xs">
-                <span className="w-1.5 h-1.5 bg-stone-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                <span className="w-1.5 h-1.5 bg-stone-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                <span className="w-1.5 h-1.5 bg-stone-500 rounded-full animate-bounce"></span>
+              <div className="flex items-center gap-2 p-2 text-stone-300 text-xs">
+                <span className="w-1.5 h-1.5 bg-stone-300 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                <span className="w-1.5 h-1.5 bg-stone-300 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                <span className="w-1.5 h-1.5 bg-stone-300 rounded-full animate-bounce"></span>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* Footer Input (Fake) */}
-          <div className="p-4 border-t border-stone-800 bg-black/20">
-            <div className="relative">
+          <div className="p-6 border-t border-stone-100 bg-white">
+            <div className="relative group">
               <input
                 type="text"
-                placeholder="Écrivez un message..."
+                placeholder="Comment puis-je vous aider ?"
                 disabled
-                className="w-full bg-stone-800/50 border border-stone-700 text-stone-500 text-sm rounded-full py-3 px-4 focus:outline-none cursor-not-allowed italic"
+                className="w-full bg-stone-50 border border-stone-100 text-stone-400 text-xs rounded-full py-4 px-6 focus:outline-none cursor-not-allowed italic"
               />
-              <button disabled className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-stone-700 rounded-full text-stone-400">
+              <button disabled className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-stone-100 rounded-full text-stone-300">
                 <Send className="w-3 h-3" />
               </button>
             </div>
-            <p className="text-[10px] text-stone-600 text-center mt-2">
-              Utilisez les options ci-dessus pour naviguer.
+            <p className="text-[9px] text-stone-400 text-center mt-4 uppercase tracking-widest font-medium">
+              Réponse instantanée par notre assistant
             </p>
           </div>
         </div>

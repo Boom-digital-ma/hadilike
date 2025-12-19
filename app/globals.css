@@ -2,19 +2,28 @@
 
 @theme {
   --font-serif: var(--font-playfair);
-  --font-sans: var(--font-montserrat);
+  --font-sans: var(--font-lato);
   
-  --color-primary: #111111;
-  --color-secondary: #C0C0C0;
-  --color-accent: #8B5A2B;
-  --color-glass: rgba(0, 0, 0, 0.4);
+  --color-brand-bg: #FAFAFA;
+  --color-brand-black: #1A1A1A;
+  --color-brand-stone: #D6D3D1;
 }
 
 @layer base {
   body {
-    @apply font-sans;
+    @apply font-sans bg-brand-bg text-brand-black antialiased selection:bg-brand-stone selection:text-white;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

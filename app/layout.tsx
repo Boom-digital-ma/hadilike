@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Montserrat } from "next/font/google";
+import { Playfair_Display, Lato } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/Footer";
 import Chatbot from "@/components/Chatbot";
 
 const playfair = Playfair_Display({
@@ -9,14 +8,15 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
 });
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
+const lato = Lato({
+  variable: "--font-lato",
   subsets: ["latin"],
+  weight: ["300", "400", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Hadilike.ma | Fleuriste d'Exception Marrakech",
-  description: "Créations florales d'exception, livraison gants blancs à Marrakech. Bouquets, Flower Boxes et compositions sur mesure.",
+  title: "Hadilike - Fleuriste d'Émotion Marrakech",
+  description: "Créations florales d'exception à Marrakech. Bouquets, Boîtes à fleurs et Sur-mesure.",
 };
 
 export default function RootLayout({
@@ -27,13 +27,10 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${playfair.variable} ${montserrat.variable} antialiased bg-white text-primary flex flex-col min-h-screen`}
+        className={`${playfair.variable} ${lato.variable} antialiased`}
       >
-        <div className="flex-grow">
-          {children}
-        </div>
+        {children}
         <Chatbot />
-        <Footer />
       </body>
     </html>
   );
