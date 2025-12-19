@@ -35,5 +35,42 @@
     },
     "createdAt": "2025-12-19T19:01:26.948Z",
     "status": "PAID"
+  },
+  {
+    "paypalId": "7MM06639KW6486330",
+    "cart": [
+      {
+        "category": "Bouquets",
+        "occasion": "Amour",
+        "style": "Bohème",
+        "budget": "400 dh",
+        "message": "TEST",
+        "date": "2025-12-21",
+        "slot": "Matin",
+        "id": "HDL-3584"
+      }
+    ],
+    "total": 400,
+    "customer": {
+      "name": {
+        "given_name": "John",
+        "surname": "Doe"
+      },
+      "email_address": "sb-ab7sy28997862@personal.example.com",
+      "payer_id": "STLVS7UBYD3XG",
+      "phone": {
+        "phone_number": {
+          "national_number": "2124181941"
+        }
+      },
+      "address": {
+        "address_line_1": "Free Trade Zone",
+        "admin_area_2": "Rabat",
+        "postal_code": "10010",
+        "country_code": "MA"
+      }
+    },
+    "createdAt": "2025-12-19T19:19:07.863Z",
+    "status": "PAID"
   }
 ]

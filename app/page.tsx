@@ -1,43 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Menu, ShoppingBag, X } from "lucide-react";
-import Link from "next/link";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { ArrowLeft } from "lucide-react";
 import { saveOrder } from "@/app/actions";
 import { Toast, ToastType } from "@/components/Toast";
+import { useCart, WizardState } from "@/context/CartContext";
 
 // Types for State
-type AppView = "home" | "wizard" | "contact";
-type WizardState = {
-  id?: string;
-  category: string;
-  occasion: string;
-  style: string;
-  budget: string;
-  message: string;
-  date: string;
-  slot: string;
-};
-
-// Paypal Options
-const initialOptions = {
-    clientId: "test", 
-    currency: "EUR", 
-    intent: "capture",
-};
+type AppView = "home" | "wizard" | "contact" | "order-success";
 
 export default function HadilikeApp() {
   const [view, setView] = useState<AppView>("home");
   const [step, setStep] = useState(1);
   const [contactTitle, setContactTitle] = useState("Contact");
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
-  
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   
-  // App State
+  const { addToCart, cart } = useCart();
+
+  // Local Wizard State
   const [order, setOrder] = useState<WizardState>({
     category: "",
     occasion: "",
@@ -48,36 +29,21 @@ export default function HadilikeApp() {
     slot: "",
   });
 
-  const [cart, setCart] = useState<WizardState[]>([]);
+  const [lastOrder, setLastOrder] = useState<{ id: string; cart: WizardState[]; total: number; customer: any } | null>(null);
+
+  // --- Listen for order completion from Navigation (PayPal) ---
+  useEffect(() => {
+    const handleOrderCompleted = (e: any) => {
+      setLastOrder(e.detail);
+      switchView("order-success");
+    };
+    window.addEventListener("orderCompleted", handleOrderCompleted);
+    return () => window.removeEventListener("orderCompleted", handleOrderCompleted);
+  }, []);
 
   // --- Helpers ---
   const showToast = (message: string, type: ToastType = "success") => {
     setToast({ message, type });
-  };
-
-  const parsePrice = (priceStr: string) => {
-    return parseInt(priceStr.replace(/\D/g, ""), 10);
-  };
-
-  const calculateTotal = () => {
-    return cart.reduce((acc, item) => acc + parsePrice(item.budget), 0);
-  };
-
-  // --- Actions ---
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const toggleCart = () => setIsCartOpen(!isCartOpen);
-
-  const startWizard = (category: string) => {
-    setOrder((prev) => ({ ...prev, category }));
-    setStep(1);
-    switchView("wizard");
-  };
-
-  const showContact = (type: string) => {
-    setContactTitle(type);
-    switchView("contact");
-    setIsMenuOpen(false);
-    setIsCartOpen(false);
   };
 
   const resetApp = () => {
@@ -92,8 +58,6 @@ export default function HadilikeApp() {
     });
     setStep(1);
     switchView("home");
-    setIsMenuOpen(false);
-    setIsCartOpen(false);
   };
 
   const switchView = (newView: AppView) => {
@@ -118,22 +82,25 @@ export default function HadilikeApp() {
     nextStep();
   };
 
-  const addToCart = () => {
+  const handleAddToCart = () => {
     const newOrder = { 
         ...order, 
         id: `HDL-${Math.floor(Math.random() * 10000)}` 
     };
-    setCart([...cart, newOrder]);
+    addToCart(newOrder);
     resetApp(); 
-    setIsCartOpen(true); 
     showToast("Création ajoutée au panier", "success");
   };
 
-  const removeFromCart = (index: number) => {
-    const newCart = [...cart];
-    newCart.splice(index, 1);
-    setCart(newCart);
-    showToast("Article retiré", "info");
+  const showContact = (type: string) => {
+    setContactTitle(type);
+    switchView("contact");
+  };
+
+  const startWizard = (category: string) => {
+    setOrder((prev) => ({ ...prev, category }));
+    setStep(1);
+    switchView("wizard");
   };
 
   // --- Logic for Date Restriction (14h rule) ---
@@ -159,159 +126,9 @@ export default function HadilikeApp() {
   };
 
   return (
-    <PayPalScriptProvider options={initialOptions}>
+    <div className="bg-brand-bg min-h-screen">
       {/* Toast Notification */}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
-      {/* === MENU DRAWER === */}
-      <div 
-        className={`fixed inset-0 z-[60] transform transition-transform duration-500 ease-in-out ${
-          isMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={toggleMenu}></div>
-        <div className="relative w-3/4 max-w-sm h-full bg-white shadow-2xl p-8 flex flex-col justify-between">
-          <div>
-            <div className="flex justify-between items-center mb-12">
-              <h2 className="font-serif text-2xl font-bold tracking-wider">HADILIKE</h2>
-              <button onClick={toggleMenu} className="text-stone-400 hover:text-black">
-                <ArrowLeft className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <nav className="space-y-6">
-              <button onClick={resetApp} className="block text-lg font-serif hover:text-stone-600 transition">Accueil</button>
-              <button onClick={() => showContact("Contact")} className="block text-lg font-serif hover:text-stone-600 transition">Contact</button>
-              <Link href="/a-propos" className="block text-lg font-serif hover:text-stone-600 transition">L'Atelier</Link>
-              <div className="w-12 h-px bg-stone-200 my-6"></div>
-              <Link href="/mentions-legales" className="block text-sm text-stone-500 hover:text-black transition">Mentions Légales</Link>
-              <Link href="/cgv" className="block text-sm text-stone-500 hover:text-black transition">CGV</Link>
-            </nav>
-          </div>
-          
-          <div className="text-xs text-stone-400 uppercase tracking-widest">
-            © 2025 Hadilike Marrakech
-          </div>
-        </div>
-      </div>
-
-      {/* === CART DRAWER === */}
-      <div 
-        className={`fixed inset-0 z-[60] transform transition-transform duration-500 ease-in-out ${
-          isCartOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={toggleCart}></div>
-        <div className="absolute right-0 w-3/4 max-w-sm h-full bg-white shadow-2xl p-8 flex flex-col overflow-y-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="font-serif text-2xl font-bold tracking-wider">PANIER</h2>
-            <button onClick={toggleCart} className="text-stone-400 hover:text-black">
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-          
-          {cart.length === 0 ? (
-            <div className="flex-grow flex flex-col items-center justify-center text-center space-y-4">
-                <ShoppingBag className="w-12 h-12 text-stone-200" />
-                <p className="font-serif text-lg text-stone-500">Votre panier est vide</p>
-                <p className="text-xs text-stone-400 uppercase tracking-widest px-8">
-                Parcourez nos créations pour trouver le bouquet idéal.
-                </p>
-                <button 
-                onClick={() => { toggleCart(); resetApp(); }}
-                className="mt-6 px-8 py-3 border border-brand-black text-xs uppercase tracking-[0.2em] hover:bg-brand-black hover:text-white transition"
-                >
-                Découvrir
-                </button>
-            </div>
-          ) : (
-            <div className="flex-grow space-y-6">
-                {cart.map((item, index) => (
-                    <div key={index} className="flex justify-between border-b border-stone-100 pb-4">
-                        <div>
-                            <p className="font-serif font-bold">{item.category}</p>
-                            <p className="text-xs text-stone-500">{item.occasion} • {item.style}</p>
-                            <p className="text-xs text-stone-400 mt-1">{item.date} ({item.slot})</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="font-bold mb-2">{item.budget}</p>
-                            <button onClick={() => removeFromCart(index)} className="text-xs text-red-400 hover:text-red-600 underline">Retirer</button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-          )}
-          
-          <div className="pt-8 border-t border-stone-100 mt-auto">
-            <div className="flex justify-between text-sm uppercase tracking-widest mb-6">
-              <span>Total</span>
-              <span className="font-bold">{calculateTotal()} DH</span>
-            </div>
-            
-            {cart.length > 0 && (
-                <div className="w-full">
-                     <PayPalButtons 
-                        style={{ layout: "vertical", shape: "rect" }}
-                        createOrder={(data, actions) => {
-                            const totalAmount = calculateTotal();
-                            return actions.order.create({
-                                intent: "CAPTURE", 
-                                purchase_units: [
-                                    {
-                                        description: "Commande Hadilike Fleurs",
-                                        amount: {
-                                            currency_code: "EUR",
-                                            value: (totalAmount * 0.1).toFixed(2) 
-                                        },
-                                    },
-                                ],
-                            });
-                        }}
-                        onApprove={async (data, actions) => {
-                            if (actions.order) {
-                                const details = await actions.order.capture();
-                                const orderData = {
-                                    paypalId: details.id,
-                                    cart: cart,
-                                    total: calculateTotal(),
-                                    customer: details.payer
-                                };
-                                
-                                await saveOrder(orderData);
-                                
-                                const firstName = details.payer?.name?.given_name || "Client";
-                                showToast(`Merci ${firstName}! Commande validée.`, "success");
-                                setCart([]); 
-                                toggleCart(); 
-                            }
-                        }}
-                     />
-                </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <header className="fixed top-0 w-full bg-brand-bg/95 backdrop-blur-sm z-50 border-b border-stone-200">
-        <div className="max-w-md mx-auto px-6 py-4 flex justify-between items-center">
-          <button onClick={toggleMenu} className="text-brand-black hover:text-stone-600 transition">
-            <Menu className="w-6 h-6" />
-          </button>
-
-          <div onClick={resetApp} className="cursor-pointer">
-            <img src="/images/logo.jpeg" alt="HADILIKE" className="h-8 object-contain" />
-          </div>
-
-          <button onClick={toggleCart} className="text-brand-black hover:text-stone-600 transition relative">
-            <ShoppingBag className="w-6 h-6" />
-            {cart.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-brand-black text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center">
-                    {cart.length}
-                </span>
-            )}
-          </button>
-        </div>
-      </header>
 
       <main className={`pt-24 pb-12 max-w-md mx-auto min-h-screen px-6 transition-opacity duration-300 ${isAnimationPlaying ? 'opacity-0' : 'opacity-100'}`}>
         
@@ -389,9 +206,9 @@ export default function HadilikeApp() {
             {/* === FOOTER === */}
             <footer className="mt-16 pt-8 border-t border-stone-200 text-center">
               <nav className="flex flex-wrap justify-center gap-4 text-xs text-stone-500 uppercase tracking-widest mb-6">
-                <Link href="/mentions-legales" className="hover:text-black transition">Mentions</Link>
-                <Link href="/cgv" className="hover:text-black transition">CGV</Link>
-                <Link href="/a-propos" className="hover:text-black transition">L'Atelier</Link>
+                <button onClick={() => window.location.href = "/mentions-legales"} className="hover:text-black transition">Mentions</button>
+                <button onClick={() => window.location.href = "/cgv"} className="hover:text-black transition">CGV</button>
+                <button onClick={() => window.location.href = "/a-propos"} className="hover:text-black transition">L'Atelier</button>
                 <button onClick={() => showContact("Contact")} className="hover:text-black transition">Contact</button>
               </nav>
               <p className="text-[10px] text-stone-400">
@@ -411,9 +228,6 @@ export default function HadilikeApp() {
               >
                 <ArrowLeft className="w-4 h-4" /> Retour
               </button>
-              <span className="text-xs uppercase tracking-widest text-stone-400">
-                Étape {step}/6
-              </span>
             </div>
 
             {/* Step 1: Occasion */}
@@ -632,7 +446,7 @@ export default function HadilikeApp() {
                 </div>
 
                 <button
-                  onClick={addToCart}
+                  onClick={handleAddToCart}
                   className="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition shadow-lg"
                 >
                   Ajouter au Panier ({order.budget})
@@ -703,7 +517,56 @@ export default function HadilikeApp() {
             </form>
           </div>
         )}
+
+        {/* === ORDER SUCCESS VIEW === */}
+        {view === "order-success" && lastOrder && (
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-stone-900 text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                <ArrowLeft className="w-8 h-8 rotate-180" />
+              </div>
+              <h2 className="font-serif text-3xl mb-2">Merci {lastOrder.customer?.name?.given_name || "Client"} !</h2>
+              <p className="text-stone-500 text-sm">Votre commande a été validée.</p>
+              <p className="text-xs text-stone-400 mt-1 uppercase tracking-widest">Réf: {lastOrder.id}</p>
+            </div>
+
+            <div className="bg-white border border-stone-100 rounded-lg p-6 mb-8 shadow-sm">
+              <h3 className="font-serif text-lg mb-4 border-b border-stone-100 pb-2">Récapitulatif</h3>
+              <div className="space-y-4">
+                {lastOrder.cart.map((item, idx) => (
+                  <div key={idx} className="flex justify-between text-sm">
+                    <div>
+                      <span className="font-bold block">{item.category}</span>
+                      <span className="text-stone-500 text-xs">{item.occasion} • {item.style}</span>
+                    </div>
+                    <span>{item.budget}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between font-bold pt-4 border-t border-stone-100 mt-4">
+                  <span>Total Payé</span>
+                  <span>{lastOrder.total} DH</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-stone-50 p-6 rounded-lg mb-8 text-sm text-stone-600">
+              <p className="mb-2 font-bold text-black">Prochaines étapes :</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Vous recevrez un email de confirmation.</li>
+                <li>Notre atelier va commencer la création.</li>
+                <li>Livraison prévue le <strong>{lastOrder.cart[0]?.date}</strong> ({lastOrder.cart[0]?.slot}).</li>
+              </ul>
+            </div>
+
+            <button 
+              onClick={resetApp}
+              className="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition"
+            >
+              Retour à l'accueil
+            </button>
+          </div>
+        )}
       </main>
-    </PayPalScriptProvider>
+    </div>
   );
 }
