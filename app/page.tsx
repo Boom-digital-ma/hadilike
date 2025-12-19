@@ -5,6 +5,7 @@ import { ArrowLeft, Menu, ShoppingBag, X } from "lucide-react";
 import Link from "next/link";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { saveOrder } from "@/app/actions";
+import { Toast, ToastType } from "@/components/Toast";
 
 // Types for State
 type AppView = "home" | "wizard" | "contact";
@@ -21,8 +22,8 @@ type WizardState = {
 
 // Paypal Options
 const initialOptions = {
-    clientId: "test", // Remplacer par "sb" ou votre vrai Client ID
-    currency: "EUR", // PayPal ne gère pas toujours le MAD nativement en test, EUR est plus sûr
+    clientId: "test", 
+    currency: "EUR", 
     intent: "capture",
 };
 
@@ -34,6 +35,7 @@ export default function HadilikeApp() {
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   
   // App State
   const [order, setOrder] = useState<WizardState>({
@@ -49,6 +51,10 @@ export default function HadilikeApp() {
   const [cart, setCart] = useState<WizardState[]>([]);
 
   // --- Helpers ---
+  const showToast = (message: string, type: ToastType = "success") => {
+    setToast({ message, type });
+  };
+
   const parsePrice = (priceStr: string) => {
     return parseInt(priceStr.replace(/\D/g, ""), 10);
   };
@@ -118,14 +124,16 @@ export default function HadilikeApp() {
         id: `HDL-${Math.floor(Math.random() * 10000)}` 
     };
     setCart([...cart, newOrder]);
-    resetApp(); // Retourne à l'accueil et reset le wizard
-    setIsCartOpen(true); // Ouvre le panier pour confirmation
+    resetApp(); 
+    setIsCartOpen(true); 
+    showToast("Création ajoutée au panier", "success");
   };
 
   const removeFromCart = (index: number) => {
     const newCart = [...cart];
     newCart.splice(index, 1);
     setCart(newCart);
+    showToast("Article retiré", "info");
   };
 
   // --- Logic for Date Restriction (14h rule) ---
@@ -144,7 +152,7 @@ export default function HadilikeApp() {
 
   const validateStep5 = () => {
     if (!order.date || !order.slot) {
-      alert("Veuillez choisir une date et un créneau.");
+      showToast("Veuillez choisir une date et un créneau.", "error");
       return;
     }
     nextStep();
@@ -152,6 +160,9 @@ export default function HadilikeApp() {
 
   return (
     <PayPalScriptProvider options={initialOptions}>
+      {/* Toast Notification */}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
       {/* === MENU DRAWER === */}
       <div 
         className={`fixed inset-0 z-[60] transform transition-transform duration-500 ease-in-out ${
@@ -242,16 +253,15 @@ export default function HadilikeApp() {
                      <PayPalButtons 
                         style={{ layout: "vertical", shape: "rect" }}
                         createOrder={(data, actions) => {
-                            // Convertir DH en EUR approximativement pour le test (1 DH = 0.1 EUR) ou garder en valeur numérique simple
                             const totalAmount = calculateTotal();
                             return actions.order.create({
-                                intent: "CAPTURE", // Required for V2
+                                intent: "CAPTURE", 
                                 purchase_units: [
                                     {
                                         description: "Commande Hadilike Fleurs",
                                         amount: {
                                             currency_code: "EUR",
-                                            value: (totalAmount * 0.1).toFixed(2) // Conversion fictive pour test
+                                            value: (totalAmount * 0.1).toFixed(2) 
                                         },
                                     },
                                 ],
@@ -267,12 +277,12 @@ export default function HadilikeApp() {
                                     customer: details.payer
                                 };
                                 
-                                // Sauvegarde locale via Server Action
                                 await saveOrder(orderData);
                                 
-                                alert(`Merci ${details.payer.name?.given_name}! Commande validée.`);
-                                setCart([]); // Vider le panier
-                                toggleCart(); // Fermer le panier
+                                const firstName = details.payer?.name?.given_name || "Client";
+                                showToast(`Merci ${firstName}! Commande validée.`, "success");
+                                setCart([]); 
+                                toggleCart(); 
                             }
                         }}
                      />
@@ -324,7 +334,7 @@ export default function HadilikeApp() {
                     Bouquets
                   </span>
                 </div>
-                <div className="w-full h-full bg-[url('/images/bouqet.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
+                <div className="w-full h-full bg-[url('/images/boite.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
               </button>
 
               <button
@@ -336,7 +346,7 @@ export default function HadilikeApp() {
                     Boîtes à fleurs
                   </span>
                 </div>
-                <div className="w-full h-full bg-[url('/images/boite.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
+                <div className="w-full h-full bg-[url('/images/bouqet.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
               </button>
 
               <button
@@ -348,25 +358,27 @@ export default function HadilikeApp() {
                     Composition Spéciale
                   </span>
                 </div>
-                <div className="w-full h-full bg-[url('/images/deco.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
+                <div className="w-full h-full bg-[url('/images/composition.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
               </button>
 
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <button
                   onClick={() => showContact("Événements")}
-                  className="h-24 rounded-lg border border-stone-300 flex flex-col items-center justify-center hover:bg-stone-50 transition"
+                  className="group relative overflow-hidden h-24 rounded-lg border border-stone-300 flex flex-col items-center justify-center hover:bg-stone-50 transition"
                 >
-                  <span className="font-serif text-lg">Événements</span>
-                  <span className="text-xs text-stone-500 uppercase mt-1">
+                  <div className="absolute inset-0 bg-[url('/images/event.jpeg')] bg-cover bg-center opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                  <span className="relative z-10 font-serif text-lg">Événements</span>
+                  <span className="relative z-10 text-xs text-stone-500 uppercase mt-1">
                     Sur Mesure
                   </span>
                 </button>
                 <button
                   onClick={() => showContact("Décoration")}
-                  className="h-24 rounded-lg border border-stone-300 flex flex-col items-center justify-center hover:bg-stone-50 transition"
+                  className="group relative overflow-hidden h-24 rounded-lg border border-stone-300 flex flex-col items-center justify-center hover:bg-stone-50 transition"
                 >
-                  <span className="font-serif text-lg">Décoration</span>
-                  <span className="text-xs text-stone-500 uppercase mt-1">
+                  <div className="absolute inset-0 bg-[url('/images/deco.jpeg')] bg-cover bg-center opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                  <span className="relative z-10 font-serif text-lg">Décoration</span>
+                  <span className="relative z-10 text-xs text-stone-500 uppercase mt-1">
                     Floral Art
                   </span>
                 </button>
@@ -639,16 +651,31 @@ export default function HadilikeApp() {
             >
               <ArrowLeft className="w-4 h-4" /> Retour Accueil
             </button>
+
+            {/* Header Image for specific services */}
+            {(contactTitle === "Événements" || contactTitle === "Décoration") && (
+              <div className="w-full h-48 rounded-lg mb-8 overflow-hidden relative">
+                <img 
+                  src={contactTitle === "Événements" ? "/images/event.jpeg" : "/images/deco.jpeg"} 
+                  className="w-full h-full object-cover" 
+                  alt={contactTitle}
+                />
+                <div className="absolute inset-0 bg-black/20"></div>
+              </div>
+            )}
+
             <h2 className="font-serif text-3xl mb-2">{contactTitle}</h2>
-            <p className="text-stone-600 mb-6">
-              Pour les demandes sur-mesure, nous préférons un échange direct.
+            <p className="text-stone-600 mb-6 italic text-sm">
+              {contactTitle === "Événements" || contactTitle === "Décoration" 
+                ? "Pour vos projets d'exception, notre atelier conçoit des scénographies uniques."
+                : "Une question ? Notre équipe est à votre écoute."}
             </p>
 
             <form
               className="space-y-4"
               onSubmit={(e) => {
                 e.preventDefault();
-                alert("Message envoyé !");
+                showToast("Message envoyé ! Nous vous répondrons sous peu.", "success");
                 resetApp();
               }}
             >
