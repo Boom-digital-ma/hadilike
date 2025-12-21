@@ -48,7 +48,7 @@ export default function Navigation() {
         <div className="relative w-3/4 max-w-sm h-full bg-white shadow-2xl p-8 flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-12">
-              <img src="/images/logo.jpeg" alt="HADILIKE" className="h-8 object-contain" />
+              <img src="/images/logo-new.jpeg" alt="HADILIKE" className="h-8 object-contain" />
               <button onClick={toggleMenu} className="text-stone-400 hover:text-black transition">
                 <X className="w-6 h-6" />
               </button>
@@ -174,7 +174,7 @@ export default function Navigation() {
           </button>
 
           <Link href="/" className="cursor-pointer">
-            <img src="/images/logo.jpeg" alt="HADILIKE" className="h-8 object-contain" />
+            <img src="/images/logo-new.jpeg" alt="HADILIKE" className="h-8 object-contain" />
           </Link>
 
           <button onClick={toggleCart} className="text-brand-black hover:text-stone-600 transition relative">
