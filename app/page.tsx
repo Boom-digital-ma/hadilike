@@ -351,6 +351,9 @@ export default function HadilikeApp() {
                                 if (order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") {
                                   return extra !== "Boîte" && extra !== "Spéciale commande";
                                 }
+                                if (order.category === "Boîtes à fleurs") {
+                                    return extra !== "Boîte" && extra !== "Spéciale commande";
+                                }
                                 return true;
                               })
                               .map((extra) => (
@@ -368,12 +371,16 @@ export default function HadilikeApp() {
                         
                         <div className="mb-8">
                             <label className="block text-sm text-stone-500 uppercase tracking-widest mb-2">
-                              {((order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") || order.category === "Boîtes à fleurs") ? "Description du bouquet" : "Commentaire"}
+                              {order.category === "Boîtes à fleurs" ? "Description de la boîte" : 
+                               ((order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") ? "Description du bouquet" : "Commentaire")}
                             </label>
                             <textarea 
                                 className="w-full p-4 border border-stone-200 rounded focus:border-black outline-none transition"
                                 rows={3}
-                                placeholder={order.category === "Boîtes à fleurs" || order.occasion === "Plaisir d'offrir" ? "Quelles fleurs souhaitez-vous ?" : "Une précision pour le fleuriste ?"}
+                                placeholder={
+                                    order.category === "Boîtes à fleurs" ? "Quelles fleurs souhaitez-vous dans votre boîte ?" :
+                                    (order.occasion === "Plaisir d'offrir" ? "Quelles fleurs souhaitez-vous ?" : "Une précision pour le fleuriste ?")
+                                }
                                 value={order.specialRequest || ""}
                                 onChange={(e) => setOrder({...order, specialRequest: e.target.value})}
                             ></textarea>
