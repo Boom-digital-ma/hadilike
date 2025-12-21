@@ -235,15 +235,29 @@ export default function HadilikeApp() {
               <div>
                 <h3 className="font-serif text-2xl mb-6">Quelle est l'occasion ?</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {["Amour", "Anniversaire", "Plaisir d'offrir", "Deuil"].map((occ) => (
-                    <button
-                      key={occ}
-                      onClick={() => updateOrder("occasion", occ)}
-                      className="p-4 border border-stone-300 rounded hover:bg-stone-100 hover:border-black transition text-left"
-                    >
-                      {occ}
-                    </button>
-                  ))}
+                  {[
+                    { name: "Amour", img: "/images/occasion/amour.jpeg" },
+                    { name: "Anniversaire", img: "/images/occasion/anniversaire.jpeg" },
+                    { name: "Plaisir d'offrir", img: "/images/occasion/plaisirdoffrir.jpeg" },
+                    { name: "Deuil", img: "/images/occasion/deuil.jpeg" },
+                  ]
+                    .filter((occ) => !(order.category === "Boîtes à fleurs" && occ.name === "Deuil"))
+                    .map((occ) => (
+                      <button
+                        key={occ.name}
+                        onClick={() => updateOrder("occasion", occ.name)}
+                        className="group relative overflow-hidden h-40 rounded-lg border border-stone-200 hover:border-black transition shadow-sm"
+                      >
+                        <div 
+                          className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition duration-700" 
+                          style={{ backgroundImage: `url('${occ.img}')` }}
+                        ></div>
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
+                        <span className="relative z-10 text-white font-serif text-lg tracking-wide shadow-black drop-shadow-md">
+                          {occ.name}
+                        </span>
+                      </button>
+                    ))}
                 </div>
               </div>
             )}
