@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { saveOrder } from "@/app/actions";
 import { Toast, ToastType } from "@/components/Toast";
 import { useCart, WizardState } from "@/context/CartContext";
+import ImageSlider from "@/components/ImageSlider";
 
 // Types for State
 type AppView = "home" | "wizard" | "contact" | "order-success";
@@ -23,6 +24,8 @@ export default function HadilikeApp() {
     category: "",
     occasion: "",
     style: "",
+    extras: [],
+    specialRequest: "",
     budget: "",
     message: "",
     date: "",
@@ -51,6 +54,8 @@ export default function HadilikeApp() {
       category: "",
       occasion: "",
       style: "",
+      extras: [],
+      specialRequest: "",
       budget: "",
       message: "",
       date: "",
@@ -69,10 +74,19 @@ export default function HadilikeApp() {
   };
 
   const nextStep = () => {
+    // Logic for "Plaisir d'offrir" + "Bouquets"
+    if (step === 2 && order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") {
+        setStep(4); // Skip step 3
+        return;
+    }
     if (step < 6) setStep(step + 1);
   };
 
   const prevStep = () => {
+    if (step === 4 && order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") {
+        setStep(2); // Back to step 2
+        return;
+    }
     if (step > 1) setStep(step - 1);
     else resetApp();
   };
@@ -80,6 +94,16 @@ export default function HadilikeApp() {
   const updateOrder = (key: keyof WizardState, value: string) => {
     setOrder((prev) => ({ ...prev, [key]: value }));
     nextStep();
+  };
+
+  const toggleExtra = (extra: string) => {
+    setOrder(prev => {
+        const currentExtras = prev.extras || [];
+        const newExtras = currentExtras.includes(extra) 
+            ? currentExtras.filter(e => e !== extra)
+            : [...currentExtras, extra];
+        return { ...prev, extras: newExtras };
+    });
   };
 
   const handleAddToCart = () => {
@@ -277,37 +301,86 @@ export default function HadilikeApp() {
             {/* Step 2: Style */}
             {step === 2 && (
               <div>
-                <h3 className="font-serif text-2xl mb-6">L'Esprit du bouquet</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { name: "Bohème", color: "bg-[#e5e0d8]", key: "boheme" },
-                    { name: "Romantique", color: "bg-[#fce7f3]", key: "romantique" },
-                    { name: "Pureté", color: "bg-[#f3f4f6]", key: "purte" },
-                    { name: "Surprise", color: "bg-[#1c1917]", dark: true, key: "surprise" },
-                  ].map((style) => {
-                    const isAmour = order.occasion === "Amour" && order.category === "Bouquets";
-                    const imgSrc = isAmour && style.key !== "surprise" 
-                      ? `/images/boquets/amour/esprit/${style.key}.jpeg` 
-                      : null;
-
-                    return (
-                      <div
-                        key={style.name}
-                        onClick={() => updateOrder("style", style.name)}
-                        className="cursor-pointer group"
-                      >
-                        <div className={`h-32 ${style.color} rounded mb-2 group-hover:scale-105 transition shadow-sm flex items-center justify-center overflow-hidden relative`}>
-                          {imgSrc ? (
-                            <img src={imgSrc} className="absolute inset-0 w-full h-full object-cover" alt={style.name} />
-                          ) : (
-                            style.dark && <span className="text-white text-3xl font-serif">?</span>
-                          )}
+                {order.category === "Bouquets" && order.occasion === "Plaisir d'offrir" ? (
+                    // === VARIANT FOR 'PLAISIR D'OFFRIR' ===
+                    <div>
+                        <h3 className="font-serif text-2xl mb-6">Les petits plus</h3>
+                        <div className="space-y-3 mb-8">
+                            {["Boîte", "Chocolat Ferrero Rocher", "Chocolat Raffaello", "Spéciale commande"].map((extra) => (
+                                <label key={extra} className="flex items-center gap-3 p-4 border border-stone-200 rounded cursor-pointer hover:bg-stone-50 transition">
+                                    <input 
+                                        type="checkbox" 
+                                        className="w-5 h-5 accent-black"
+                                        checked={order.extras?.includes(extra) || false}
+                                        onChange={() => toggleExtra(extra)}
+                                    />
+                                    <span className="font-serif text-lg">{extra}</span>
+                                </label>
+                            ))}
                         </div>
-                        <p className="text-center font-serif">{style.name === "Surprise" ? "Surprise du Chef" : style.name}</p>
-                      </div>
-                    );
-                  })}
-                </div>
+                        
+                        <div className="mb-8">
+                            <label className="block text-sm text-stone-500 uppercase tracking-widest mb-2">Commentaire</label>
+                            <textarea 
+                                className="w-full p-4 border border-stone-200 rounded focus:border-black outline-none transition"
+                                rows={3}
+                                placeholder="Une précision pour le fleuriste ?"
+                                value={order.specialRequest || ""}
+                                onChange={(e) => setOrder({...order, specialRequest: e.target.value})}
+                            ></textarea>
+                        </div>
+
+                        <button 
+                            onClick={nextStep}
+                            className="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition"
+                        >
+                            Continuer vers le budget
+                        </button>
+                    </div>
+                ) : (
+                    // === STANDARD STYLE SELECTION ===
+                    <div>
+                        <h3 className="font-serif text-2xl mb-6">L'Esprit du bouquet</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                        {[
+                            { name: "Bohème", color: "bg-[#e5e0d8]", key: "boheme" },
+                            { name: "Romantique", color: "bg-[#fce7f3]", key: "romantique" },
+                            { name: "Pureté", color: "bg-[#f3f4f6]", key: "purte" },
+                            { name: "Surprise", color: "bg-fuchsia-600", dark: true, key: "surprise" },
+                        ].map((style) => {
+                            const isBouquet = order.category === "Bouquets";
+                            let imgSrc = null;
+
+                            if (isBouquet && style.key !== "surprise") {
+                            if (order.occasion === "Amour") {
+                                imgSrc = `/images/boquets/amour/esprit/${style.key}.jpeg`;
+                            } else if (order.occasion === "Anniversaire") {
+                                // Handling directory typo 'espirt' and filename 'pure'
+                                const filename = style.key === "purte" ? "pure" : style.key;
+                                imgSrc = `/images/boquets/anniversaire/espirt/${filename}.jpeg`;
+                            }
+                            }
+
+                            return (
+                            <div
+                                key={style.name}
+                                onClick={() => updateOrder("style", style.name)}
+                                className="cursor-pointer group"
+                            >
+                                <div className={`h-32 ${style.color} rounded mb-2 group-hover:scale-105 transition shadow-sm flex items-center justify-center overflow-hidden relative`}>
+                                {imgSrc ? (
+                                    <img src={imgSrc} className="absolute inset-0 w-full h-full object-cover" alt={style.name} />
+                                ) : (
+                                    style.dark && <span className="text-white text-3xl font-serif">?</span>
+                                )}
+                                </div>
+                                <p className="text-center font-serif">{style.name === "Surprise" ? "Surprise du Chef" : style.name}</p>
+                            </div>
+                            );
+                        })}
+                        </div>
+                    </div>
+                )}
               </div>
             )}
 
@@ -325,23 +398,40 @@ export default function HadilikeApp() {
                   {/* Image mapping logic */}
                   {(() => {
                     let folder = order.category === "Boîtes à fleurs" ? "boites" : "boquets";
-                    let filename = order.occasion.toLowerCase();
-                    
-                    // Specific mapping for filename variations
+                    let occasionKey = order.occasion.toLowerCase();
                     if (folder === "boites") {
-                      if (filename === "anniversaire") filename = "anniversair";
-                      if (filename === "plaisir d'offrir") filename = "plaisir";
+                      if (occasionKey === "anniversaire") occasionKey = "anniversair";
+                      if (occasionKey === "plaisir d'offrir") occasionKey = "plaisir";
                     } else {
-                      if (filename === "plaisir d'offrir") filename = "plaisirdoffrir";
+                      if (occasionKey === "plaisir d'offrir") occasionKey = "plaisirdoffrir";
+                    }
+
+                    // Style mapping
+                    const styleKeyMap: Record<string, string> = {
+                      "Bohème": "boheme",
+                      "Romantique": "romantique",
+                      "Pureté": "purte"
+                    };
+                    const styleKey = styleKeyMap[order.style];
+
+                    // Check if we have a style-specific image
+                    let src = `/images/${folder}/${occasionKey}.jpeg`;
+                    
+                    if (order.category === "Bouquets" && styleKey) {
+                      if (order.occasion === "Amour") {
+                        src = `/images/boquets/amour/esprit/${styleKey}.jpeg`;
+                      } else if (order.occasion === "Anniversaire") {
+                        const birthdayStyleKey = styleKey === "purte" ? "pure" : styleKey;
+                        src = `/images/boquets/anniversaire/espirt/${birthdayStyleKey}.jpeg`;
+                      }
                     }
 
                     return (
                       <img 
-                        src={`/images/${folder}/${filename}.jpeg`} 
+                        src={src} 
                         className="w-full h-full object-cover animate-in fade-in zoom-in duration-1000"
-                        alt={`Inspiration ${order.occasion}`}
+                        alt={`Inspiration ${order.style}`}
                         onError={(e) => {
-                          // Fallback to a default if image is missing
                           (e.target as HTMLImageElement).src = "/images/composition.jpeg";
                         }}
                       />
@@ -481,10 +571,21 @@ export default function HadilikeApp() {
                       <span className="text-stone-500">Occasion:</span> <br />
                       <span className="font-bold">{order.occasion}</span>
                     </div>
-                    <div>
-                      <span className="text-stone-500">Style:</span> <br />
-                      <span className="font-bold">{order.style}</span>
-                    </div>
+                    {/* Conditional display for Style or Extras */}
+                    {order.occasion === "Plaisir d'offrir" && order.category === "Bouquets" ? (
+                        <div className="col-span-2">
+                            <span className="text-stone-500">Extras:</span> <br />
+                            <span className="font-bold text-xs">{(order.extras?.length ?? 0) > 0 ? order.extras?.join(", ") : "Aucun"}</span>
+                            {order.specialRequest && (
+                                <p className="mt-1 text-xs italic text-stone-600">Note: {order.specialRequest}</p>
+                            )}
+                        </div>
+                    ) : (
+                        <div>
+                            <span className="text-stone-500">Style:</span> <br />
+                            <span className="font-bold">{order.style}</span>
+                        </div>
+                    )}
                     <div>
                       <span className="text-stone-500">Budget:</span> <br />
                       <span className="font-bold">{order.budget}</span>
@@ -524,16 +625,29 @@ export default function HadilikeApp() {
               <ArrowLeft className="w-4 h-4" /> Retour Accueil
             </button>
 
-            {/* Header Image for specific services */}
-            {(contactTitle === "Événements" || contactTitle === "Décoration") && (
-              <div className="w-full h-48 rounded-lg mb-8 overflow-hidden relative">
-                <img 
-                  src={contactTitle === "Événements" ? "/images/event.jpeg" : "/images/deco.jpeg"} 
-                  className="w-full h-full object-cover" 
-                  alt={contactTitle}
-                />
-                <div className="absolute inset-0 bg-black/20"></div>
-              </div>
+            {/* Header Image Slider for specific services */}
+            {contactTitle === "Événements" && (
+              <ImageSlider 
+                images={[
+                  "/images/event/event1.jpeg",
+                  "/images/event/event2.jpeg",
+                  "/images/event/event3.jpeg"
+                ]} 
+              />
+            )}
+
+            {contactTitle === "Décoration" && (
+              <ImageSlider 
+                images={[
+                  "/images/deco/deco1.jpeg",
+                  "/images/deco/deco2.jpeg",
+                  "/images/deco/deco3.jpeg",
+                  "/images/deco/deco4.jpeg",
+                  "/images/deco/deco5.jpeg",
+                  "/images/deco/deco6.jpeg",
+                  "/images/deco/deco7.jpeg"
+                ]} 
+              />
             )}
 
             <h2 className="font-serif text-3xl mb-2">{contactTitle}</h2>
@@ -595,7 +709,7 @@ export default function HadilikeApp() {
                   <div key={idx} className="flex justify-between text-sm">
                     <div>
                       <span className="font-bold block">{item.category}</span>
-                      <span className="text-stone-500 text-xs">{item.occasion} • {item.style}</span>
+                      <span className="text-stone-500 text-xs">{item.occasion} • {item.style || "Personnalisé"}</span>
                     </div>
                     <span>{item.budget}</span>
                   </div>

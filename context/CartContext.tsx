@@ -7,6 +7,8 @@ export type WizardState = {
   category: string;
   occasion: string;
   style: string;
+  extras?: string[];
+  specialRequest?: string;
   budget: string;
   message: string;
   date: string;
