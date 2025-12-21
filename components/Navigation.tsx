@@ -167,7 +167,7 @@ export default function Navigation() {
         </div>
       </div>
 
-      <header className="fixed top-0 w-full bg-brand-bg/95 backdrop-blur-sm z-50 border-b border-stone-200">
+      <header className="fixed top-0 w-full bg-white z-50 border-b border-stone-200">
         <div className="max-w-md mx-auto px-6 py-4 flex justify-between items-center">
           <button onClick={toggleMenu} className="text-brand-black hover:text-stone-600 transition">
             <Menu className="w-6 h-6" />

@@ -74,8 +74,15 @@ export default function HadilikeApp() {
   };
 
   const nextStep = () => {
-    // Logic for "Plaisir d'offrir" + "Bouquets"
-    if (step === 2 && order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") {
+    // Logic for "Composition Spéciale"
+    if (step === 1 && order.category === "Composition Spéciale") {
+        setStep(4);
+        return;
+    }
+    // Logic for "Plaisir d'offrir" + "Bouquets" AND "Boîtes à fleurs"
+    const isSpecialFlow = (order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") || order.category === "Boîtes à fleurs";
+    
+    if (step === 2 && isSpecialFlow) {
         setStep(4); // Skip step 3
         return;
     }
@@ -83,7 +90,14 @@ export default function HadilikeApp() {
   };
 
   const prevStep = () => {
-    if (step === 4 && order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") {
+    // Logic for "Composition Spéciale"
+    if (step === 4 && order.category === "Composition Spéciale") {
+        setStep(1);
+        return;
+    }
+    const isSpecialFlow = (order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") || order.category === "Boîtes à fleurs";
+
+    if (step === 4 && isSpecialFlow) {
         setStep(2); // Back to step 2
         return;
     }
@@ -257,58 +271,89 @@ export default function HadilikeApp() {
             {/* Step 1: Occasion */}
             {step === 1 && (
               <div>
-                <h3 className="font-serif text-2xl mb-6">Quelle est l'occasion ?</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { name: "Amour", key: "amour" },
-                    { name: "Anniversaire", key: "anniversaire" },
-                    { name: "Plaisir d'offrir", key: "plaisir" },
-                    { name: "Deuil", key: "deuil" },
-                  ]
-                    .filter((occ) => !(order.category === "Boîtes à fleurs" && occ.name === "Deuil"))
-                    .map((occ) => {
-                      let folder = order.category === "Boîtes à fleurs" ? "boites" : "boquets";
-                      let filename = occ.key;
-                      
-                      // Handling filename variations
-                      if (folder === "boites") {
-                        if (filename === "anniversaire") filename = "anniversair";
-                      } else {
-                        if (filename === "plaisir") filename = "plaisirdoffrir";
-                      }
+                {order.category === "Composition Spéciale" ? (
+                  <div>
+                    <h3 className="font-serif text-2xl mb-6">Votre Composition</h3>
+                    <div className="mb-8">
+                        <label className="block text-sm text-stone-500 uppercase tracking-widest mb-2">Description</label>
+                        <textarea 
+                            className="w-full p-4 border border-stone-200 rounded focus:border-black outline-none transition"
+                            rows={5}
+                            placeholder="Décrivez la composition que vous souhaitez (fleurs, couleurs, contenant...)"
+                            value={order.specialRequest || ""}
+                            onChange={(e) => setOrder({...order, specialRequest: e.target.value})}
+                        ></textarea>
+                    </div>
+                    <button 
+                        onClick={nextStep}
+                        className="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition"
+                    >
+                        Continuer vers le budget
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <h3 className="font-serif text-2xl mb-6">Quelle est l'occasion ?</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        { name: "Amour", key: "amour" },
+                        { name: "Anniversaire", key: "anniversaire" },
+                        { name: "Plaisir d'offrir", key: "plaisir" },
+                        { name: "Deuil", key: "deuil" },
+                      ]
+                        .filter((occ) => !(order.category === "Boîtes à fleurs" && occ.name === "Deuil"))
+                        .map((occ) => {
+                          let folder = order.category === "Boîtes à fleurs" ? "boites" : "boquets";
+                          let filename = occ.key;
+                          
+                          // Handling filename variations
+                          if (folder === "boites") {
+                            if (filename === "anniversaire") filename = "anniversair";
+                          } else {
+                            if (filename === "plaisir") filename = "plaisirdoffrir";
+                          }
 
-                      return (
-                        <button
-                          key={occ.name}
-                          onClick={() => updateOrder("occasion", occ.name)}
-                          className="group flex flex-col gap-2 text-center"
-                        >
-                          <div className="relative w-full aspect-square rounded-lg border border-stone-200 overflow-hidden shadow-sm hover:border-black transition duration-300">
-                            <div 
-                              className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition duration-700" 
-                              style={{ backgroundImage: `url('/images/${folder}/${filename}.jpeg')` }}
-                            ></div>
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
-                          </div>
-                          <span className="text-stone-800 font-serif text-lg tracking-wide group-hover:text-black transition-colors">
-                            {occ.name}
-                          </span>
-                        </button>
-                      );
-                    })}
-                </div>
+                          return (
+                            <button
+                              key={occ.name}
+                              onClick={() => updateOrder("occasion", occ.name)}
+                              className="group flex flex-col gap-2 text-center"
+                            >
+                              <div className="relative w-full aspect-square rounded-lg border border-stone-200 overflow-hidden shadow-sm hover:border-black transition duration-300">
+                                <div 
+                                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition duration-700" 
+                                  style={{ backgroundImage: `url('/images/${folder}/${filename}.jpeg')` }}
+                                ></div>
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                              </div>
+                              <span className="text-stone-800 font-serif text-lg tracking-wide group-hover:text-black transition-colors">
+                                {occ.name}
+                              </span>
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Step 2: Style */}
             {step === 2 && (
               <div>
-                {order.category === "Bouquets" && order.occasion === "Plaisir d'offrir" ? (
-                    // === VARIANT FOR 'PLAISIR D'OFFRIR' ===
+                {((order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") || order.category === "Boîtes à fleurs") ? (
+                    // === VARIANT FOR 'PLAISIR D'OFFRIR' OR 'BOÎTES À FLEURS' ===
                     <div>
                         <h3 className="font-serif text-2xl mb-6">Les petits plus</h3>
                         <div className="space-y-3 mb-8">
-                            {["Boîte", "Chocolat Ferrero Rocher", "Chocolat Raffaello", "Spéciale commande"].map((extra) => (
+                            {["Boîte", "Chocolat Ferrero Rocher", "Chocolat Raffaello", "Spéciale commande"]
+                              .filter(extra => {
+                                if (order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") {
+                                  return extra !== "Boîte" && extra !== "Spéciale commande";
+                                }
+                                return true;
+                              })
+                              .map((extra) => (
                                 <label key={extra} className="flex items-center gap-3 p-4 border border-stone-200 rounded cursor-pointer hover:bg-stone-50 transition">
                                     <input 
                                         type="checkbox" 
@@ -322,11 +367,13 @@ export default function HadilikeApp() {
                         </div>
                         
                         <div className="mb-8">
-                            <label className="block text-sm text-stone-500 uppercase tracking-widest mb-2">Commentaire</label>
+                            <label className="block text-sm text-stone-500 uppercase tracking-widest mb-2">
+                              {((order.category === "Bouquets" && order.occasion === "Plaisir d'offrir") || order.category === "Boîtes à fleurs") ? "Description du bouquet" : "Commentaire"}
+                            </label>
                             <textarea 
                                 className="w-full p-4 border border-stone-200 rounded focus:border-black outline-none transition"
                                 rows={3}
-                                placeholder="Une précision pour le fleuriste ?"
+                                placeholder={order.category === "Boîtes à fleurs" || order.occasion === "Plaisir d'offrir" ? "Quelles fleurs souhaitez-vous ?" : "Une précision pour le fleuriste ?"}
                                 value={order.specialRequest || ""}
                                 onChange={(e) => setOrder({...order, specialRequest: e.target.value})}
                             ></textarea>
@@ -574,7 +621,7 @@ export default function HadilikeApp() {
                       <span className="font-bold">{order.occasion}</span>
                     </div>
                     {/* Conditional display for Style or Extras */}
-                    {order.occasion === "Plaisir d'offrir" && order.category === "Bouquets" ? (
+                    {(order.occasion === "Plaisir d'offrir" && order.category === "Bouquets") || order.category === "Boîtes à fleurs" ? (
                         <div className="col-span-2">
                             <span className="text-stone-500">Extras:</span> <br />
                             <span className="font-bold text-xs">{(order.extras?.length ?? 0) > 0 ? order.extras?.join(", ") : "Aucun"}</span>
