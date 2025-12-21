@@ -151,7 +151,7 @@ export default function HadilikeApp() {
                     Bouquets
                   </span>
                 </div>
-                <div className="w-full h-full bg-[url('/images/boite.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
+                <div className="w-full h-full bg-[url('/images/bouqet.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
               </button>
 
               <button
@@ -163,7 +163,7 @@ export default function HadilikeApp() {
                     Boîtes à fleurs
                   </span>
                 </div>
-                <div className="w-full h-full bg-[url('/images/bouqet.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
+                <div className="w-full h-full bg-[url('/images/boite.jpeg')] bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"></div>
               </button>
 
               <button
@@ -236,28 +236,40 @@ export default function HadilikeApp() {
                 <h3 className="font-serif text-2xl mb-6">Quelle est l'occasion ?</h3>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { name: "Amour", img: "/images/occasion/amour.jpeg" },
-                    { name: "Anniversaire", img: "/images/occasion/anniversaire.jpeg" },
-                    { name: "Plaisir d'offrir", img: "/images/occasion/plaisirdoffrir.jpeg" },
-                    { name: "Deuil", img: "/images/occasion/deuil.jpeg" },
+                    { name: "Amour", key: "amour" },
+                    { name: "Anniversaire", key: "anniversaire" },
+                    { name: "Plaisir d'offrir", key: "plaisir" },
+                    { name: "Deuil", key: "deuil" },
                   ]
                     .filter((occ) => !(order.category === "Boîtes à fleurs" && occ.name === "Deuil"))
-                    .map((occ) => (
-                      <button
-                        key={occ.name}
-                        onClick={() => updateOrder("occasion", occ.name)}
-                        className="group relative overflow-hidden h-40 rounded-lg border border-stone-200 hover:border-black transition shadow-sm"
-                      >
-                        <div 
-                          className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition duration-700" 
-                          style={{ backgroundImage: `url('${occ.img}')` }}
-                        ></div>
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                        <span className="relative z-10 text-white font-serif text-lg tracking-wide shadow-black drop-shadow-md">
-                          {occ.name}
-                        </span>
-                      </button>
-                    ))}
+                    .map((occ) => {
+                      let folder = order.category === "Boîtes à fleurs" ? "boites" : "boquets";
+                      let filename = occ.key;
+                      
+                      // Handling filename variations
+                      if (folder === "boites") {
+                        if (filename === "anniversaire") filename = "anniversair";
+                      } else {
+                        if (filename === "plaisir") filename = "plaisirdoffrir";
+                      }
+
+                      return (
+                        <button
+                          key={occ.name}
+                          onClick={() => updateOrder("occasion", occ.name)}
+                          className="group relative overflow-hidden h-40 rounded-lg border border-stone-200 hover:border-black transition shadow-sm"
+                        >
+                          <div 
+                            className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition duration-700" 
+                            style={{ backgroundImage: `url('/images/${folder}/${filename}.jpeg')` }}
+                          ></div>
+                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
+                          <span className="relative z-10 text-white font-serif text-lg tracking-wide shadow-black drop-shadow-md">
+                            {occ.name}
+                          </span>
+                        </button>
+                      );
+                    })}
                 </div>
               </div>
             )}
@@ -268,22 +280,33 @@ export default function HadilikeApp() {
                 <h3 className="font-serif text-2xl mb-6">L'Esprit du bouquet</h3>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { name: "Bohème", color: "bg-[#e5e0d8]" },
-                    { name: "Romantique", color: "bg-[#fce7f3]" },
-                    { name: "Pureté", color: "bg-[#f3f4f6]" },
-                    { name: "Surprise", color: "bg-[#1c1917]", dark: true },
-                  ].map((style) => (
-                    <div
-                      key={style.name}
-                      onClick={() => updateOrder("style", style.name)}
-                      className="cursor-pointer group"
-                    >
-                      <div className={`h-32 ${style.color} rounded mb-2 group-hover:scale-105 transition shadow-sm flex items-center justify-center`}>
-                        {style.dark && <span className="text-white text-3xl font-serif">?</span>}
+                    { name: "Bohème", color: "bg-[#e5e0d8]", key: "boheme" },
+                    { name: "Romantique", color: "bg-[#fce7f3]", key: "romantique" },
+                    { name: "Pureté", color: "bg-[#f3f4f6]", key: "purte" },
+                    { name: "Surprise", color: "bg-[#1c1917]", dark: true, key: "surprise" },
+                  ].map((style) => {
+                    const isAmour = order.occasion === "Amour" && order.category === "Bouquets";
+                    const imgSrc = isAmour && style.key !== "surprise" 
+                      ? `/images/boquets/amour/esprit/${style.key}.jpeg` 
+                      : null;
+
+                    return (
+                      <div
+                        key={style.name}
+                        onClick={() => updateOrder("style", style.name)}
+                        className="cursor-pointer group"
+                      >
+                        <div className={`h-32 ${style.color} rounded mb-2 group-hover:scale-105 transition shadow-sm flex items-center justify-center overflow-hidden relative`}>
+                          {imgSrc ? (
+                            <img src={imgSrc} className="absolute inset-0 w-full h-full object-cover" alt={style.name} />
+                          ) : (
+                            style.dark && <span className="text-white text-3xl font-serif">?</span>
+                          )}
+                        </div>
+                        <p className="text-center font-serif">{style.name === "Surprise" ? "Surprise du Chef" : style.name}</p>
                       </div>
-                      <p className="text-center font-serif">{style.name === "Surprise" ? "Surprise du Chef" : style.name}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -298,16 +321,37 @@ export default function HadilikeApp() {
                   "Chaque création est unique et dépend de l'arrivage du matin."
                 </p>
 
-                <div className="grid grid-cols-2 gap-2 mb-8">
-                  <div className="h-40 bg-stone-200 rounded animate-pulse"></div>
-                  <div className="h-40 bg-stone-300 rounded animate-pulse delay-75"></div>
-                  <div className="h-40 bg-stone-300 rounded animate-pulse delay-150"></div>
-                  <div className="h-40 bg-stone-200 rounded animate-pulse delay-200"></div>
+                <div className="w-full aspect-square rounded-lg overflow-hidden mb-8 shadow-inner bg-stone-100 relative">
+                  {/* Image mapping logic */}
+                  {(() => {
+                    let folder = order.category === "Boîtes à fleurs" ? "boites" : "boquets";
+                    let filename = order.occasion.toLowerCase();
+                    
+                    // Specific mapping for filename variations
+                    if (folder === "boites") {
+                      if (filename === "anniversaire") filename = "anniversair";
+                      if (filename === "plaisir d'offrir") filename = "plaisir";
+                    } else {
+                      if (filename === "plaisir d'offrir") filename = "plaisirdoffrir";
+                    }
+
+                    return (
+                      <img 
+                        src={`/images/${folder}/${filename}.jpeg`} 
+                        className="w-full h-full object-cover animate-in fade-in zoom-in duration-1000"
+                        alt={`Inspiration ${order.occasion}`}
+                        onError={(e) => {
+                          // Fallback to a default if image is missing
+                          (e.target as HTMLImageElement).src = "/images/composition.jpeg";
+                        }}
+                      />
+                    );
+                  })()}
                 </div>
 
                 <button
                   onClick={nextStep}
-                  className="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition"
+                  className="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition shadow-md"
                 >
                   Continuer vers le budget
                 </button>
