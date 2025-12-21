@@ -281,14 +281,16 @@ export default function HadilikeApp() {
                         <button
                           key={occ.name}
                           onClick={() => updateOrder("occasion", occ.name)}
-                          className="group relative overflow-hidden h-40 rounded-lg border border-stone-200 hover:border-black transition shadow-sm"
+                          className="group flex flex-col gap-2 text-center"
                         >
-                          <div 
-                            className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition duration-700" 
-                            style={{ backgroundImage: `url('/images/${folder}/${filename}.jpeg')` }}
-                          ></div>
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                          <span className="relative z-10 text-white font-serif text-lg tracking-wide shadow-black drop-shadow-md">
+                          <div className="relative w-full aspect-square rounded-lg border border-stone-200 overflow-hidden shadow-sm hover:border-black transition duration-300">
+                            <div 
+                              className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition duration-700" 
+                              style={{ backgroundImage: `url('/images/${folder}/${filename}.jpeg')` }}
+                            ></div>
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                          </div>
+                          <span className="text-stone-800 font-serif text-lg tracking-wide group-hover:text-black transition-colors">
                             {occ.name}
                           </span>
                         </button>
