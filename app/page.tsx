@@ -531,7 +531,7 @@ export default function HadilikeApp() {
               <div>
                 <h3 className="font-serif text-2xl mb-6">Votre Budget</h3>
                 <div className="space-y-3">
-                  {getCategoryConfig()?.budgets.map((opt) => (
+                  {getCategoryConfig()?.budgets?.map((opt) => (
                         <button
                           key={opt.price}
                           onClick={() => updateOrder("budget", opt.price)}
