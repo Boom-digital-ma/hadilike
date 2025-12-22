@@ -1,6 +1,14 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
 export default function MentionsLegales() {
   return (
     <main className="pt-32 pb-12 px-6 max-w-2xl mx-auto min-h-screen">
+      <Link href="/" className="inline-flex items-center text-stone-500 hover:text-black mb-8 transition-colors">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        <span className="text-sm uppercase tracking-wide">Retour à l'accueil</span>
+      </Link>
+
       <h1 className="font-serif text-3xl mb-8">Mentions Légales</h1>
       <div className="space-y-6 text-sm text-stone-600 leading-relaxed">
         <p>Conformément aux dispositions de la loi n° 31-08 édictant des mesures de protection du consommateur.</p>

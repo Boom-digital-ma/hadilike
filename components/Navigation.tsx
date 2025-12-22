@@ -48,7 +48,9 @@ export default function Navigation() {
         <div className="relative w-3/4 max-w-sm h-full bg-white shadow-2xl p-8 flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-12">
-              <img src="/images/logo-new.jpeg" alt="HADILIKE" className="h-12 object-contain" />
+              <Link href="/" onClick={toggleMenu} className="cursor-pointer">
+                <img src="/images/logo-new.jpeg" alt="HADILIKE" className="h-12 object-contain" />
+              </Link>
               <button onClick={toggleMenu} className="text-stone-400 hover:text-black transition">
                 <X className="w-6 h-6" />
               </button>
@@ -56,7 +58,6 @@ export default function Navigation() {
             
             <nav className="space-y-6">
               <button onClick={() => navigateTo("/")} className="block text-lg font-serif hover:text-stone-600 transition">Accueil</button>
-              <button onClick={() => navigateTo("/")} className="block text-lg font-serif hover:text-stone-600 transition">Commander</button>
               <button onClick={() => navigateTo("/a-propos")} className="block text-lg font-serif hover:text-stone-600 transition">L'Atelier</button>
               <div className="w-12 h-px bg-stone-200 my-6"></div>
               <button onClick={() => navigateTo("/mentions-legales")} className="block text-sm text-stone-500 hover:text-black transition">Mentions Légales</button>
