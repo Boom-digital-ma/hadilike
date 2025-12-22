@@ -14,7 +14,7 @@ type AppView = "home" | "wizard" | "contact" | "order-success" | "quick-preview"
 export default function HadilikeApp() {
   const [view, setView] = useState<AppView>("home");
   const [step, setStep] = useState(1);
-  const [contactTitle, setContactTitle] = useState("Contact");
+  const [activeContactId, setActiveContactId] = useState<string>("general");
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [previewImage, setPreviewImage] = useState<string>("");
@@ -154,8 +154,8 @@ export default function HadilikeApp() {
     showToast("Création ajoutée au panier", "success");
   };
 
-  const showContact = (type: string) => {
-    setContactTitle(type);
+  const showContact = (id: string) => {
+    setActiveContactId(id);
     switchView("contact");
   };
 
@@ -228,7 +228,7 @@ export default function HadilikeApp() {
                 {SHOP_CONFIG.filter(c => c.type === "service").map((svc) => (
                     <button
                     key={svc.id}
-                    onClick={() => showContact(svc.title)}
+                    onClick={() => showContact(svc.id)}
                     className="group relative overflow-hidden h-24 rounded-lg border border-stone-300 flex flex-col items-center justify-center hover:bg-stone-50 transition"
                     >
                     <div 
@@ -251,7 +251,7 @@ export default function HadilikeApp() {
                 <button onClick={() => window.location.href = "/mentions-legales"} className="hover:text-black transition">Mentions</button>
                 <button onClick={() => window.location.href = "/cgv"} className="hover:text-black transition">CGV</button>
                 <button onClick={() => window.location.href = "/a-propos"} className="hover:text-black transition">L'Atelier</button>
-                <button onClick={() => showContact("Contact")} className="hover:text-black transition">Contact</button>
+                <button onClick={() => showContact("general")} className="hover:text-black transition">Contact</button>
               </nav>
               <p className="text-[10px] text-stone-400">
                 Fait avec amour à Marrakech
@@ -688,85 +688,64 @@ export default function HadilikeApp() {
           </div>
         )}
 
-        {/* === QUICK PREVIEW VIEW === */}
-        {view === "quick-preview" && (
-          <div className="animate-in fade-in zoom-in duration-500 flex flex-col min-h-[70vh]">
+        {/* === CONTACT VIEW === */}
+        {view === "contact" && (
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
             <button
-              onClick={() => switchView("wizard")}
+              onClick={resetApp}
               className="mb-6 text-sm text-stone-500 hover:text-black flex items-center gap-1 transition"
             >
-              <ArrowLeft className="w-4 h-4" /> Retour à la sélection
+              <ArrowLeft className="w-4 h-4" /> Retour Accueil
             </button>
 
-            <div className="flex-grow">
-                <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-2xl mb-8 bg-white border border-stone-100">
-                    <img src={previewImage} className="w-full h-full object-cover" alt="Aperçu Coup de Cœur" />
-                </div>
+            {/* Dynamic Header Image Slider */}
+            {(() => {
+                const serviceConfig = SHOP_CONFIG.find(c => c.id === activeContactId);
+                if (serviceConfig?.sliderImages) {
+                    return <ImageSlider images={serviceConfig.sliderImages} />;
+                }
+                return null;
+            })()}
 
-                <div className="text-center mb-8">
-                    <h2 className="font-serif text-3xl mb-2">Notre Signature</h2>
-                    <p className="text-stone-500 uppercase tracking-[0.2em] text-xs mb-4">{order.category}</p>
-                    <div className="inline-block px-6 py-2 bg-stone-100 rounded-full font-bold text-lg">
-                        {order.budget}
-                    </div>
-                </div>
-            </div>
+            <h2 className="font-serif text-3xl mb-2">
+                {SHOP_CONFIG.find(c => c.id === activeContactId)?.title || "Contact"}
+            </h2>
+            <p className="text-stone-600 mb-6 italic text-sm">
+              {activeContactId === "events" || activeContactId === "decoration" 
+                ? "Pour vos projets d'exception, notre atelier conçoit des scénographies uniques."
+                : "Une question ? Notre équipe est à votre écoute."}
+            </p>
 
-            <button
-              onClick={() => { setStep(5); switchView("wizard"); }}
-              className="w-full py-5 bg-brand-black text-white rounded-xl font-serif text-xl tracking-wide hover:bg-stone-800 transition shadow-lg"
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                showToast("Message envoyé ! Nous vous répondrons sous peu.", "success");
+                resetApp();
+              }}
             >
-              Commander maintenant
-            </button>
-          </div>
-        )}
-
-        {/* === ORDER SUCCESS VIEW === */}
-        {view === "order-success" && lastOrder && (
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-stone-900 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                <ArrowLeft className="w-8 h-8 rotate-180" />
-              </div>
-              <h2 className="font-serif text-3xl mb-2">Merci {lastOrder.customer?.name?.given_name || "Client"} !</h2>
-              <p className="text-stone-500 text-sm">Votre commande a été validée.</p>
-              <p className="text-xs text-stone-400 mt-1 uppercase tracking-widest">Réf: {lastOrder.id}</p>
-            </div>
-
-            <div className="bg-white border border-stone-100 rounded-lg p-6 mb-8 shadow-sm">
-              <h3 className="font-serif text-lg mb-4 border-b border-stone-100 pb-2">Récapitulatif</h3>
-              <div className="space-y-4">
-                {lastOrder.cart.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-sm">
-                    <div>
-                      <span className="font-bold block">{item.category}</span>
-                      <span className="text-stone-500 text-xs">{item.occasion} • {item.style || "Personnalisé"}</span>
-                    </div>
-                    <span>{item.budget}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between font-bold pt-4 border-t border-stone-100 mt-4">
-                  <span>Total Payé</span>
-                  <span>{lastOrder.total} DH</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-stone-50 p-6 rounded-lg mb-8 text-sm text-stone-600">
-              <p className="mb-2 font-bold text-black">Prochaines étapes :</p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Vous recevrez un email de confirmation.</li>
-                <li>Notre atelier va commencer la création.</li>
-                <li>Livraison prévue le <strong>{lastOrder.cart[0]?.date}</strong> ({lastOrder.cart[0]?.slot}).</li>
-              </ul>
-            </div>
-
-            <button 
-              onClick={resetApp}
-              className="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition"
-            >
-              Retour à l'accueil
-            </button>
+              <input
+                type="text"
+                placeholder="Votre Nom"
+                className="w-full p-3 bg-white border border-stone-300 rounded outline-none focus:border-black transition"
+                required
+              />
+              <input
+                type="tel"
+                placeholder="Téléphone"
+                className="w-full p-3 bg-white border border-stone-300 rounded outline-none focus:border-black transition"
+                required
+              />
+              <textarea
+                placeholder="Décrivez votre projet..."
+                rows={4}
+                className="w-full p-3 bg-white border border-stone-300 rounded outline-none focus:border-black transition"
+                required
+              ></textarea>
+              <button className="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition">
+                Envoyer la demande
+              </button>
+            </form>
           </div>
         )}
       </main>
