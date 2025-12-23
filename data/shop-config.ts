@@ -35,7 +35,7 @@ export const SHOP_CONFIG = [
     slug: "bouquets",
     title: "Bouquets",
     subtitle: "L'Art Floral",
-    coverImage: "/images/bouqet.jpeg",
+    coverImage: "/images/boite.jpeg",
     folderName: "boquets",
     flow: "wizard",
     quickBuyPrice: "580 dh",
