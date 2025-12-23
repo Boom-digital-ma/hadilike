@@ -1,6 +1,7 @@
 export const SHOP_CONFIG = [
   {
     id: "Boîtes à fleurs",
+    slug: "boites-a-fleurs",
     title: "Boîtes à fleurs",
     subtitle: "L'élégance en boîte",
     coverImage: "/images/boite.jpeg",
@@ -23,14 +24,15 @@ export const SHOP_CONFIG = [
       { label: "La Folie", price: "1 350 dh" },
     ],
     occasions: [
-      { id: "amour", label: "Amour", image: "/images/boites/amour.jpeg" },
-      { id: "anniversaire", label: "Anniversaire", image: "/images/boites/anniversair.jpeg" },
-      { id: "plaisir", label: "Plaisir d'offrir", image: "/images/boites/plaisir.jpeg" },
+      { id: "amour", slug: "amour", label: "Amour", image: "/images/boites/amour.jpeg" },
+      { id: "anniversaire", slug: "anniversaire", label: "Anniversaire", image: "/images/boites/anniversair.jpeg" },
+      { id: "plaisir", slug: "plaisir-d-offrir", label: "Plaisir d'offrir", image: "/images/boites/plaisir.jpeg" },
       // Deuil excluded for Boxes based on previous logic
     ]
   },
   {
     id: "Bouquets",
+    slug: "bouquets",
     title: "Bouquets",
     subtitle: "L'Art Floral",
     coverImage: "/images/bouqet.jpeg",
@@ -53,14 +55,15 @@ export const SHOP_CONFIG = [
       { label: "La Folie", price: "1 200 dh" },
     ],
     occasions: [
-      { id: "amour", label: "Amour", image: "/images/boquets/amour.jpeg" },
-      { id: "anniversaire", label: "Anniversaire", image: "/images/boquets/anniversaire.jpeg" },
-      { id: "plaisir", label: "Plaisir d'offrir", image: "/images/boquets/plaisirdoffrir.jpeg" },
-      { id: "deuil", label: "Deuil", image: "/images/boquets/deuil.jpeg" },
+      { id: "amour", slug: "amour", label: "Amour", image: "/images/boquets/amour.jpeg" },
+      { id: "anniversaire", slug: "anniversaire", label: "Anniversaire", image: "/images/boquets/anniversaire.jpeg" },
+      { id: "plaisir", slug: "plaisir-d-offrir", label: "Plaisir d'offrir", image: "/images/boquets/plaisirdoffrir.jpeg" },
+      { id: "deuil", slug: "deuil", label: "Deuil", image: "/images/boquets/deuil.jpeg" },
     ]
   },
   {
     id: "Composition Spéciale",
+    slug: "composition-speciale",
     title: "Composition Spéciale",
     subtitle: "Sur Mesure",
     coverImage: "/images/composition.jpeg",
@@ -78,6 +81,7 @@ export const SHOP_CONFIG = [
   },
   {
     id: "events",
+    slug: "evenements", // Added slug
     title: "Événements",
     subtitle: "Sur Mesure",
     coverImage: "/images/event.jpeg",
@@ -90,6 +94,7 @@ export const SHOP_CONFIG = [
   },
   {
     id: "decoration",
+    slug: "decoration", // Added slug
     title: "Décoration",
     subtitle: "Floral Art",
     coverImage: "/images/deco.jpeg",
@@ -107,8 +112,8 @@ export const SHOP_CONFIG = [
 ];
 
 export const STYLES = [
-  { id: "boheme", label: "Bohème", color: "bg-[#e5e0d8]" },
-  { id: "romantique", label: "Romantique", color: "bg-[#fce7f3]" },
-  { id: "purte", label: "Pureté", color: "bg-[#f3f4f6]" }, // "Pureté" excluded for Bouquets > Anniversaire
-  { id: "surprise", label: "Surprise du Chef", color: "bg-fuchsia-600", dark: true },
+  { id: "boheme", slug: "boheme", label: "Bohème", color: "bg-[#e5e0d8]" },
+  { id: "romantique", slug: "romantique", label: "Romantique", color: "bg-[#fce7f3]" },
+  { id: "purte", slug: "purete", label: "Pureté", color: "bg-[#f3f4f6]" }, // "Pureté" excluded for Bouquets > Anniversaire
+  { id: "surprise", slug: "surprise-du-chef", label: "Surprise du Chef", color: "bg-fuchsia-600", dark: true },
 ];
