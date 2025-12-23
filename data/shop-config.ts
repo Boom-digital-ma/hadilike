@@ -4,7 +4,7 @@ export const SHOP_CONFIG = [
     slug: "boites-a-fleurs",
     title: "Boîtes à fleurs",
     subtitle: "L'élégance en boîte",
-    coverImage: "/images/boite.jpeg",
+    coverImage: "/images/bouqet.jpeg",
     folderName: "boites", // Used for image path logic
     flow: "wizard", // 'wizard' (standard) or 'direct' (description only)
     quickBuyPrice: "650 dh",
