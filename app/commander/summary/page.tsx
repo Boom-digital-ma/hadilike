@@ -87,6 +87,15 @@ export default function SummaryPage() {
       >
         Ajouter au Panier ({order.budget})
       </button>
+
+      <div className="mt-6 space-y-2 text-center">
+        <p className="text-xs text-stone-500">
+          ✓ Vous recevez une validation de votre commande après paiement par notre atelier.
+        </p>
+        <p className="text-xs text-stone-500">
+          ✓ Une photo réelle sera envoyée sur votre WhatsApp pour validation avant livraison le jour J.
+        </p>
+      </div>
     </div>
   );
 }

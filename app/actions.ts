@@ -21,9 +21,9 @@ export async function saveOrder(orderData: any) {
 
     // Ajouter la nouvelle commande
     const newOrder = {
+      status: "PENDING",
       ...orderData,
       createdAt: new Date().toISOString(),
-      status: "PAID", // On suppose que PayPal a validé
     };
 
     orders.push(newOrder);

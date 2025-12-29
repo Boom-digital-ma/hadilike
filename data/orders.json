@@ -72,5 +72,47 @@
     },
     "createdAt": "2025-12-19T19:19:07.863Z",
     "status": "PAID"
+  },
+  {
+    "status": "PENDING_WESTERN_UNION",
+    "cart": [
+      {
+        "category": "Boîtes à fleurs",
+        "occasion": "Amour",
+        "style": "",
+        "extras": [
+          "Chocolat Ferrero Rocher"
+        ],
+        "specialRequest": "",
+        "budget": "450 dh",
+        "message": "TEST",
+        "date": "2025-12-30",
+        "slot": "Matin",
+        "id": "HDL-6010"
+      }
+    ],
+    "total": 450,
+    "method": "western",
+    "createdAt": "2025-12-29T12:20:52.823Z"
+  },
+  {
+    "status": "PENDING_COD",
+    "cart": [
+      {
+        "category": "Bouquets",
+        "occasion": "Amour",
+        "style": "Bohème",
+        "extras": [],
+        "specialRequest": "",
+        "budget": "700 dh",
+        "message": "test",
+        "date": "2025-12-30",
+        "slot": "Matin",
+        "id": "HDL-4073"
+      }
+    ],
+    "total": 700,
+    "method": "cod",
+    "createdAt": "2025-12-29T12:22:18.579Z"
   }
 ]
