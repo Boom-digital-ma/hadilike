@@ -78,12 +78,21 @@ export const SHOP_CONFIG = [
       { label: "La Folie", price: "2 000 dh" },
     ],
     // No occasions or best sellers for this specific flow
+    sliderImages: [
+        "/images/compo/comp1.jpeg",
+        "/images/compo/comp2.jpeg",
+        "/images/compo/comp3.jpeg",
+        "/images/compo/comp4.jpeg",
+        "/images/compo/comp5.jpeg",
+        "/images/compo/comp6.jpeg",
+        "/images/compo/comp7.jpeg"
+    ]
   },
   {
     id: "events",
     slug: "evenements", // Added slug
-    title: "Événements",
-    subtitle: "Sur Mesure",
+    title: "Wedding",
+    subtitle: "",
     coverImage: "/images/event.jpeg",
     type: "service", // Identifies this as a contact form flow
     sliderImages: [
@@ -95,8 +104,8 @@ export const SHOP_CONFIG = [
   {
     id: "decoration",
     slug: "decoration", // Added slug
-    title: "Décoration",
-    subtitle: "Floral Art",
+    title: "Art floral",
+    subtitle: "",
     coverImage: "/images/deco.jpeg",
     type: "service",
     sliderImages: [
@@ -117,3 +126,44 @@ export const STYLES = [
   { id: "purte", slug: "purete", label: "Pureté", color: "bg-[#f3f4f6]" }, // "Pureté" excluded for Bouquets > Anniversaire
   { id: "surprise", slug: "surprise-du-chef", label: "Surprise du Chef", color: "bg-fuchsia-600", dark: true },
 ];
+
+export const PROMO_POPUP_CONFIG = {
+  enabled: false,
+  delay: 500, // ms
+  image: "/images/boquets/best/best1.jpeg",
+  subtitle: "Collection 2026",
+  title: "L'Éclat de Marrakech",
+  description: "Découvrez nos nouvelles créations florales d'exception. Livraison prestige offerte pour votre première commande.",
+  buttonText: "Découvrir la collection",
+  link: "/bouquets" // Optional link destination
+};
+
+export const CHATBOT_CONFIG = {
+  enabled: true,
+};
+
+export const REVIEWS_CONFIG = {
+  enabled: true,
+  title: "Ils nous font confiance",
+  googleMapsLink: "https://maps.app.goo.gl/PvpLHoaLEpQ9fRzY6?g_st=awb",
+  reviews: [
+    {
+      id: 1,
+      name: "Sarah B.",
+      text: "Un service exceptionnel ! Le bouquet était magnifique et la livraison parfaite. Merci Hadilike.",
+      rating: 5,
+    },
+    {
+      id: 2,
+      name: "Mehdi K.",
+      text: "J'ai commandé une box pour l'anniversaire de ma femme, elle a adoré. Très classe.",
+      rating: 5,
+    },
+    {
+      id: 3,
+      name: "Julie L.",
+      text: "Fleuriste très à l'écoute et compositions originales. Je recommande vivement !",
+      rating: 5,
+    },
+  ]
+};

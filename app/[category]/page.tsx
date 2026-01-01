@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { SHOP_CONFIG } from "@/data/shop-config";
 import { useOrder } from "@/context/OrderContext";
+import ImageSlider from "@/components/ImageSlider";
 
 export default function CategoryPage() {
   const params = useParams();
@@ -20,13 +21,6 @@ export default function CategoryPage() {
 
   // Handle Quick Buy Click
   const handleQuickBuy = (imgSrc: string) => {
-    // For quick buy, we might want a specific URL or just use context?
-    // User wanted "friendly routing".
-    // Quick buy skips selection. Ideally it goes to a checkout page.
-    // Let's assume we go to a checkout page /commander with params?
-    // Or we keep using the context wizard for the final steps.
-    // Let's navigate to /commander which we will create for the final steps (Budget -> Details).
-    
     setOrder({
         category: config.id,
         occasion: "Coup de Cœur",
@@ -39,34 +33,30 @@ export default function CategoryPage() {
         slot: ""
     });
     
-    // We pass the image via query param or context. Context is set above.
-    // But wait, the preview page showed the image.
-    // Let's create a special route for quick buy preview?
-    // /commander/preview?img=...
     const encodedImg = encodeURIComponent(imgSrc);
     router.push(`/commander/preview?img=${encodedImg}`);
   };
 
   const handleOccasionClick = (occ: any) => {
-    // Navigate to [category]/[occasion]
     setOrder(prev => ({ ...prev, category: config.id, occasion: occ.label }));
     router.push(`/${categorySlug}/${occ.slug}`);
   };
 
   // Direct Flow (Composition Spéciale)
   if (config.flow === "direct") {
-     // This page acts as the form.
-     // On submit, go to budget?
-     // Let's reuse the logic: Description -> Budget -> Details.
-     // We can do this in /commander/custom?
-     // Or just keep it here and navigate to /commander/budget after description.
      return (
         <div className="bg-brand-bg min-h-screen pt-24 pb-12 px-6 max-w-md mx-auto animate-in fade-in slide-in-from-right-8 duration-500">
             <Link href="/" className="inline-flex items-center text-stone-500 hover:text-black mb-8 transition-colors">
                 <ArrowLeft className="w-4 h-4 mr-2" /> Retour
             </Link>
             
-            <h3 className="font-serif text-2xl mb-6">{config.title}</h3>
+            {config.sliderImages && <ImageSlider images={config.sliderImages} />}
+
+            <h3 className="font-serif text-3xl mb-2">{config.title}</h3>
+            <p className="text-stone-500 italic text-sm mb-8">
+              Laissez-vous inspirer par nos créations sur-mesure pour votre projet unique.
+            </p>
+
             <div className="mb-8">
                 <label className="block text-sm text-stone-500 uppercase tracking-widest mb-2">
                     {config.descriptionLabel || "Description"}

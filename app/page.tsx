@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Toast, ToastType } from "@/components/Toast";
-import { SHOP_CONFIG } from "@/data/shop-config";
+import { SHOP_CONFIG, PROMO_POPUP_CONFIG } from "@/data/shop-config";
+import PromoModal from "@/components/PromoModal";
+import ReviewsSection from "@/components/ReviewsSection";
 
 export default function HadilikeHome() {
   const router = useRouter();
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [showPromo, setShowPromo] = useState(PROMO_POPUP_CONFIG.enabled);
 
   const showToast = (message: string, type: ToastType = "success") => {
     setToast({ message, type });
@@ -16,6 +19,7 @@ export default function HadilikeHome() {
 
   return (
     <div className="bg-brand-bg min-h-screen">
+      <PromoModal isOpen={showPromo} onClose={() => setShowPromo(false)} />
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="pt-24 pb-12 max-w-md mx-auto min-h-screen px-6 flex flex-col min-h-[80vh]">
@@ -33,13 +37,13 @@ export default function HadilikeHome() {
                   href={`/${cat.slug}`}
                   className="block w-full group relative overflow-hidden h-32 rounded-lg bg-stone-200 shadow-sm transition hover:shadow-md"
                 >
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition z-10">
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition z-10">
                     <span className="font-serif text-xl text-white tracking-wide text-center px-4">
                       {cat.title}
                     </span>
                   </div>
                   <div 
-                    className="w-full h-full bg-cover bg-center opacity-80 group-hover:scale-105 transition duration-700"
+                    className="w-full h-full bg-cover bg-center opacity-100 group-hover:scale-105 transition duration-700"
                     style={{ backgroundImage: `url('${cat.coverImage}')` }}
                   ></div>
                 </Link>
@@ -51,20 +55,26 @@ export default function HadilikeHome() {
                     <Link
                     key={svc.id}
                     href={`/services/${svc.id}`}
-                    className="block group relative overflow-hidden h-24 rounded-lg border border-stone-300 flex flex-col items-center justify-center hover:bg-stone-50 transition"
+                    className="block group relative overflow-hidden h-24 rounded-lg border border-stone-300 flex flex-col items-center justify-center transition"
                     >
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition z-10"></div>
                     <div 
-                        className="absolute inset-0 bg-cover bg-center opacity-20 group-hover:opacity-40 transition-opacity"
+                        className="absolute inset-0 bg-cover bg-center opacity-100 group-hover:scale-105 transition duration-700"
                         style={{ backgroundImage: `url('${svc.coverImage}')` }}
                     ></div>
-                    <span className="relative z-10 font-serif text-lg">{svc.title}</span>
-                    <span className="relative z-10 text-xs text-stone-500 uppercase mt-1">
-                        {svc.subtitle}
-                    </span>
+                    <span className="relative z-20 font-serif text-lg text-white">{svc.title}</span>
+                    {svc.subtitle && (
+                      <span className="relative z-20 text-[10px] text-white/90 uppercase mt-1 tracking-wider">
+                          {svc.subtitle}
+                      </span>
+                    )}
                     </Link>
                 ))}
               </div>
             </div>
+            
+            {/* Reviews Section */}
+            <ReviewsSection />
         </div>
 
         {/* === FOOTER === */}

@@ -4,6 +4,7 @@ import "./globals.css";
 import Chatbot from "@/components/Chatbot";
 import Navigation from "@/components/Navigation";
 import { Providers } from "@/components/Providers";
+import { CHATBOT_CONFIG } from "@/data/shop-config";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -34,7 +35,7 @@ export default function RootLayout({
         <Providers>
           <Navigation />
           {children}
-          <Chatbot />
+          {CHATBOT_CONFIG.enabled && <Chatbot />}
         </Providers>
       </body>
     </html>

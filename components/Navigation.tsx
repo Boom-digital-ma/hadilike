@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Menu, ShoppingBag, X, ArrowLeft, CreditCard, Banknote, Landmark } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { PayPalButtons } from "@paypal/react-paypal-js";
@@ -81,7 +82,13 @@ export default function Navigation() {
           <div>
             <div className="flex justify-between items-center mb-12">
               <Link href="/" onClick={toggleMenu} className="cursor-pointer">
-                <img src="/images/logo-new.jpeg" alt="HADILIKE" className="h-12 object-contain" />
+                <Image 
+                  src="/images/logo-new.jpeg" 
+                  alt="HADILIKE" 
+                  width={120} 
+                  height={48} 
+                  className="h-12 w-auto object-contain" 
+                />
               </Link>
               <button onClick={toggleMenu} className="text-stone-400 hover:text-black transition">
                 <X className="w-6 h-6" />
@@ -281,7 +288,14 @@ export default function Navigation() {
           </button>
 
           <Link href="/" className="cursor-pointer">
-            <img src="/images/logo-new.jpeg" alt="HADILIKE" className="h-12 object-contain" />
+            <Image 
+              src="/images/logo-new.jpeg" 
+              alt="HADILIKE" 
+              width={120} 
+              height={48} 
+              className="h-12 w-auto object-contain" 
+              priority 
+            />
           </Link>
 
           <button onClick={toggleCart} className="text-brand-black hover:text-stone-600 transition relative">
