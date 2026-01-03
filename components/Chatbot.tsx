@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { useBrand } from "@/context/BrandContext";
 
 type Message = {
   id: number;
@@ -12,6 +13,8 @@ type Message = {
 };
 
 export default function Chatbot() {
+  const { settings } = useBrand();
+  const config = settings?.chatbot_config || { enabled: false };
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -36,6 +39,8 @@ export default function Chatbot() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isOpen]);
+
+  if (!config.enabled) return null;
 
   const handleOptionClick = (action: string, label: string) => {
     const userMsg: Message = { id: Date.now(), text: label, isUser: true };

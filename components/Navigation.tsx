@@ -8,21 +8,18 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { saveOrder } from "@/app/actions";
-import { Toast, ToastType } from "@/components/Toast";
+import { useBrand } from "@/context/BrandContext";
 
 export default function Navigation() {
+  const { brand, currentCity } = useBrand();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const { cart, removeFromCart, clearCart, isCartOpen, setIsCartOpen, toggleCart } = useCart();
   const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'western' | 'cod'>('paypal');
   const [customerDetails, setCustomerDetails] = useState({ name: "", phone: "" });
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  const showToast = (message: string, type: ToastType = "success") => {
-    setToast({ message, type });
-  };
 
   const parsePrice = (priceStr: string) => {
     return parseInt(priceStr.replace(/\D/g, ""), 10);
@@ -39,11 +36,13 @@ export default function Navigation() {
 
   const handleManualOrder = async () => {
     if (!customerDetails.name || !customerDetails.phone) {
-        showToast("Veuillez remplir vos coordonnées (Nom et Tél/WhatsApp)", "error");
+        setAlert({ message: "Veuillez remplir vos coordonnées (Nom et Tél/WhatsApp)", type: 'error' });
         return;
     }
 
     const orderData = {
+        brandId: brand.id,
+        cityId: currentCity.id,
         cart: cart,
         total: calculateTotal(),
         method: paymentMethod,
@@ -56,20 +55,51 @@ export default function Navigation() {
     
     const result = await saveOrder(orderData);
     if (result.success) {
-        showToast("Commande enregistrée avec succès !", "success");
-        // Dispatch custom event or use router to handle success view
-        window.dispatchEvent(new CustomEvent("orderCompleted", { detail: { ...orderData, id: `MANUAL-${Date.now()}` } }));
+        // Clear everything before redirect
         clearCart();
         setIsCartOpen(false);
         setCustomerDetails({ name: "", phone: "" });
+        
+        // Redirect to success page with encoded data
+        const params = new URLSearchParams({
+            id: result.orderId || '',
+            name: orderData.customer.name.given_name || '',
+            total: orderData.total.toString(),
+            method: orderData.method || 'unknown'
+        });
+        router.push(`/commander/success?${params.toString()}`);
     } else {
-        showToast("Erreur lors de l'enregistrement", "error");
+        console.error("Save Order Failed:", result);
+        setAlert({ message: "Erreur lors de l'enregistrement", type: 'error' });
     }
   };
 
+  const logoUrl = brand?.theme_config?.logo_url || "/images/logo-new.jpeg";
+
   return (
     <>
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {/* Custom Alert Modal */}
+      {alert && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center scale-in-center animate-in zoom-in-95 duration-300">
+            <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center ${alert.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+              {alert.type === 'success' ? '✓' : '!'}
+            </div>
+            <h3 className="font-serif text-xl mb-2 text-stone-900">
+              {alert.type === 'success' ? 'Félicitations' : 'Oups !'}
+            </h3>
+            <p className="text-stone-600 text-sm mb-8 leading-relaxed">
+              {alert.message}
+            </p>
+            <button 
+              onClick={() => setAlert(null)}
+              className="w-full py-4 bg-brand-black text-white rounded-full font-serif text-lg hover:bg-stone-800 transition shadow-lg"
+            >
+              D'accord
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* === MENU DRAWER === */}
       <div 
@@ -83,7 +113,7 @@ export default function Navigation() {
             <div className="flex justify-between items-center mb-12">
               <Link href="/" onClick={toggleMenu} className="cursor-pointer">
                 <Image 
-                  src="/images/logo-new.jpeg" 
+                  src={logoUrl} 
                   alt="HADILIKE" 
                   width={120} 
                   height={48} 
@@ -150,7 +180,7 @@ export default function Navigation() {
                         </div>
                         <div className="text-right">
                             <p className="font-bold mb-2">{item.budget}</p>
-                            <button onClick={() => { removeFromCart(index); showToast("Article retiré", "info"); }} className="text-xs text-red-400 hover:text-red-600 underline transition">Retirer</button>
+                            <button onClick={() => { removeFromCart(index); }} className="text-xs text-red-400 hover:text-red-600 underline transition">Retirer</button>
                         </div>
                     </div>
                 ))}
@@ -174,7 +204,7 @@ export default function Navigation() {
                         <label className={`flex items-center space-x-3 p-3 rounded border cursor-pointer transition ${paymentMethod === 'western' ? 'border-brand-black bg-stone-50' : 'border-stone-200 hover:bg-stone-50'}`}>
                             <input type="radio" name="payment" className="accent-brand-black" checked={paymentMethod === 'western'} onChange={() => setPaymentMethod('western')} />
                             <Landmark className="w-5 h-5 text-stone-600" />
-                            <span className="text-sm font-medium">Western Union</span>
+                            <span className="text-sm font-medium">Cash Plus</span>
                         </label>
                          <label className={`flex items-center space-x-3 p-3 rounded border cursor-pointer transition ${paymentMethod === 'cod' ? 'border-brand-black bg-stone-50' : 'border-stone-200 hover:bg-stone-50'}`}>
                             <input type="radio" name="payment" className="accent-brand-black" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
@@ -225,6 +255,8 @@ export default function Navigation() {
                                 if (actions.order) {
                                     const details = await actions.order.capture();
                                     const orderData = {
+                                        brandId: brand.id,
+                                        cityId: currentCity.id,
                                         paypalId: details.id,
                                         cart: cart,
                                         total: calculateTotal(),
@@ -232,12 +264,21 @@ export default function Navigation() {
                                         status: 'PAID'
                                     };
                                     
-                                    await saveOrder(orderData);
+                                    const result = await saveOrder(orderData);
                                     
-                                    // Dispatch custom event or use router to handle success view
-                                    window.dispatchEvent(new CustomEvent("orderCompleted", { detail: { ...orderData, id: details.id } }));
-                                    clearCart();
-                                    setIsCartOpen(false);
+                                    if (result.success) {
+                                        clearCart();
+                                        setIsCartOpen(false);
+                                        const params = new URLSearchParams({
+                                            id: details.id || '',
+                                            name: details.payer?.name?.given_name || '',
+                                            total: calculateTotal().toString(),
+                                            method: 'paypal'
+                                        });
+                                        router.push(`/commander/success?${params.toString()}`);
+                                    } else {
+                                        setAlert({ message: "Erreur lors de la sauvegarde de la commande.", type: 'error' });
+                                    }
                                 }
                             }}
                         />
@@ -245,7 +286,7 @@ export default function Navigation() {
 
                      {paymentMethod === 'western' && (
                         <div className="bg-stone-50 p-4 rounded text-center border border-stone-200">
-                             <p className="text-sm font-serif mb-2 text-stone-800">Transfert Western Union</p>
+                             <p className="text-sm font-serif mb-2 text-stone-800">Transfert Cash Plus</p>
                              <p className="text-xs text-stone-500 mb-4">
                                 Validez votre commande pour recevoir les coordonnées de transfert par email/WhatsApp.
                              </p>
@@ -289,7 +330,7 @@ export default function Navigation() {
 
           <Link href="/" className="cursor-pointer">
             <Image 
-              src="/images/logo-new.jpeg" 
+              src={logoUrl} 
               alt="HADILIKE" 
               width={120} 
               height={48} 

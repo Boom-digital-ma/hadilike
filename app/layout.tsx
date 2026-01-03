@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Lato } from "next/font/google";
 import "./globals.css";
-import Chatbot from "@/components/Chatbot";
-import Navigation from "@/components/Navigation";
 import { Providers } from "@/components/Providers";
-import { CHATBOT_CONFIG } from "@/data/shop-config";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -33,9 +30,7 @@ export default function RootLayout({
         className={`${playfair.variable} ${lato.variable} antialiased`}
       >
         <Providers>
-          <Navigation />
           {children}
-          {CHATBOT_CONFIG.enabled && <Chatbot />}
         </Providers>
       </body>
     </html>

@@ -1,20 +1,32 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { REVIEWS_CONFIG } from "@/data/shop-config";
+import { useBrand } from "@/context/BrandContext";
+import { getReviews } from "@/lib/api";
+import { useState, useEffect } from "react";
 
 export default function ReviewsSection() {
-  if (!REVIEWS_CONFIG.enabled) return null;
+  const { brand, currentCity, settings } = useBrand();
+  const [reviews, setReviews] = useState<any[]>([]);
+  const config = settings?.reviews_config || { enabled: false };
+
+  useEffect(() => {
+    if (config.enabled && brand) {
+      getReviews(brand.id, currentCity?.id).then(setReviews);
+    }
+  }, [brand, currentCity, config.enabled]);
+
+  if (!config.enabled) return null;
 
   return (
     <div className="mt-20 mb-12">
       <div className="text-center mb-10">
-        <h3 className="font-serif text-3xl mb-2 text-stone-900">{REVIEWS_CONFIG.title}</h3>
+        <h3 className="font-serif text-3xl mb-2 text-stone-900">{config.title}</h3>
         <div className="w-16 h-px bg-stone-300 mx-auto"></div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {REVIEWS_CONFIG.reviews.map((review) => (
+        {reviews.map((review) => (
           <div 
             key={review.id} 
             className="bg-stone-50 p-8 rounded-lg border border-stone-100 shadow-sm hover:shadow-md transition duration-300"
@@ -25,10 +37,10 @@ export default function ReviewsSection() {
               ))}
             </div>
             <p className="text-stone-600 text-sm italic mb-6 text-center leading-relaxed font-serif">
-              "{review.text}"
+              "{review.content}"
             </p>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-900 text-center">
-              {review.name}
+              {review.author_name}
             </p>
           </div>
         ))}
@@ -36,7 +48,7 @@ export default function ReviewsSection() {
 
       <div className="mt-10 text-center">
         <a 
-          href={REVIEWS_CONFIG.googleMapsLink}
+          href={config.googleMapsLink}
           target="_blank" 
           rel="noopener noreferrer"
           className="inline-flex items-center gap-3 px-8 py-3 bg-white border border-stone-200 text-stone-800 rounded-none text-xs uppercase tracking-[0.15em] hover:bg-stone-900 hover:text-white hover:border-stone-900 transition duration-300"

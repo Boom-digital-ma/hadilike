@@ -250,9 +250,9 @@
                     <p id="summary-message" class="italic text-stone-800 font-serif"></p>
                 </div>
 
-                <button onclick="alert('Commande simulée ! Redirection vers paiement...')" class="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition shadow-lg">
-                    Commander (<span id="btn-price"></span>)
-                </button>
+<button onclick="console.log('Commande simulée ! Redirection vers paiement...')" class="w-full py-4 bg-brand-black text-white rounded font-serif tracking-wide hover:bg-stone-800 transition shadow-lg">
+  Payer 650 dh
+</button>
             </div>
         </div>
 

@@ -1,9 +1,7 @@
-"use client";
-
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { PROMO_POPUP_CONFIG } from "@/data/shop-config";
 import Link from "next/link";
+import { useBrand } from "@/context/BrandContext";
 
 interface PromoModalProps {
   isOpen: boolean;
@@ -11,6 +9,9 @@ interface PromoModalProps {
 }
 
 export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
+  const { settings } = useBrand();
+  const config = settings?.promo_popup || {};
+
   if (!isOpen) return null;
 
   return (
@@ -29,7 +30,7 @@ export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
             <div className="w-full md:w-3/5 h-[50vh] md:h-full relative">
                  <div 
                     className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url('${PROMO_POPUP_CONFIG.image}')` }}
+                    style={{ backgroundImage: `url('${config.image}')` }}
                   >
                     <div className="absolute inset-0 bg-black/10 md:hidden"></div>
                   </div>
@@ -38,22 +39,22 @@ export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
             {/* Text/Content Section */}
             <div className="w-full md:w-2/5 p-12 md:p-20 flex flex-col justify-center bg-white h-[50vh] md:h-full">
                 <div className="max-w-sm mx-auto md:mx-0">
-                  {PROMO_POPUP_CONFIG.subtitle && (
+                  {config.subtitle && (
                     <span className="text-stone-500 uppercase tracking-[0.3em] text-xs mb-4 block">
-                      {PROMO_POPUP_CONFIG.subtitle}
+                      {config.subtitle}
                     </span>
                   )}
                   <h3 className="font-serif text-5xl md:text-7xl mb-8 text-stone-900 leading-tight">
-                    {PROMO_POPUP_CONFIG.title}
+                    {config.title}
                   </h3>
                   <p className="text-stone-600 mb-12 font-sans text-lg leading-relaxed">
-                      {PROMO_POPUP_CONFIG.description}
+                      {config.description}
                   </p>
                   
-                  {PROMO_POPUP_CONFIG.link ? (
-                    <Link href={PROMO_POPUP_CONFIG.link} onClick={onClose} className="block w-full md:w-auto">
+                  {config.link ? (
+                    <Link href={config.link} onClick={onClose} className="block w-full md:w-auto">
                         <button className="w-full px-12 bg-stone-900 text-white py-5 rounded-full font-serif text-xl hover:bg-stone-800 transition shadow-xl">
-                            {PROMO_POPUP_CONFIG.buttonText}
+                            {config.buttonText}
                         </button>
                     </Link>
                   ) : (
@@ -61,7 +62,7 @@ export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
                         onClick={onClose}
                         className="w-full md:w-auto px-12 bg-stone-900 text-white py-5 rounded-full font-serif text-xl hover:bg-stone-800 transition shadow-xl"
                     >
-                        {PROMO_POPUP_CONFIG.buttonText}
+                        {config.buttonText}
                     </button>
                   )}
                 </div>

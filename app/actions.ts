@@ -1,39 +1,41 @@
 "use server";
 
-import fs from "fs/promises";
-import path from "path";
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+);
 
 export async function saveOrder(orderData: any) {
   try {
-    const dataDir = path.join(process.cwd(), "data");
-    const filePath = path.join(dataDir, "orders.json");
+    const { brandId, cityId, cart, total, method, customer, status, paypalId } = orderData;
 
-    // Vérifier si le fichier existe, sinon le créer avec un tableau vide
-    try {
-      await fs.access(filePath);
-    } catch {
-      await fs.writeFile(filePath, "[]", "utf-8");
+    const { data, error } = await supabase
+      .from('orders')
+      .insert({
+        brand_id: brandId,
+        city_id: cityId,
+        customer_name: customer.name.given_name + (customer.name.surname ? ' ' + customer.name.surname : ''),
+        customer_phone: customer.phone.phone_number.national_number,
+        customer_email: customer.email || null,
+        total_amount: total,
+        payment_method: method || (paypalId ? 'paypal' : 'unknown'),
+        payment_status: status || (paypalId ? 'paid' : 'pending'),
+        items: cart,
+        metadata: { paypal_id: paypalId }
+      })
+      .select()
+      .single();
+
+    if (error) {
+        console.error("Supabase Insert Error:", error);
+        throw error;
     }
 
-    // Lire le contenu actuel
-    const fileContent = await fs.readFile(filePath, "utf-8");
-    const orders = JSON.parse(fileContent || "[]");
-
-    // Ajouter la nouvelle commande
-    const newOrder = {
-      status: "PENDING",
-      ...orderData,
-      createdAt: new Date().toISOString(),
-    };
-
-    orders.push(newOrder);
-
-    // Écrire le fichier mis à jour
-    await fs.writeFile(filePath, JSON.stringify(orders, null, 2), "utf-8");
-
-    return { success: true, message: "Commande enregistrée avec succès" };
+    return { success: true, message: "Commande enregistrée avec succès", orderId: data.id };
   } catch (error) {
     console.error("Erreur lors de la sauvegarde de la commande:", error);
-    return { success: false, message: "Erreur serveur interne" };
+    return { success: false, message: "Erreur serveur interne", error: error };
   }
 }
