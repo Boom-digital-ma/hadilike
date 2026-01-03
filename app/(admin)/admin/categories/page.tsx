@@ -5,6 +5,9 @@ import { createBrowserClient } from "@supabase/ssr";
 import { Edit, Save, Loader2, X, Layout, Layers } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Link from "next/link";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function CategoriesAdmin() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -13,10 +16,7 @@ export default function CategoriesAdmin() {
   const [editForm, setEditForm] = useState({ title: "", subtitle: "", cover_image: "", display_order: 0 });
   const [saving, setSaving] = useState(false);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     async function fetchCategories() {
@@ -63,7 +63,7 @@ export default function CategoriesAdmin() {
     if (error) {
         alert("Erreur: " + error.message);
     } else {
-        setCategories(prev => prev.map(c => c.id === id ? { ...c, ...editForm } : c));
+        setCategories(prev => prev.map((c: any) => c.id === id ? { ...c, ...editForm } : c));
         setEditingId(null);
     }
     setSaving(false);
@@ -80,7 +80,7 @@ export default function CategoriesAdmin() {
         {loading ? (
             <div className="text-center py-10 text-stone-400">Chargement...</div>
         ) : (
-            categories.map((cat) => (
+            categories.map((cat: any) => (
                 <div key={cat.id} className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
                     {editingId === cat.id ? (
                         <div className="space-y-6">

@@ -5,6 +5,9 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Alert, { AlertType } from "@/components/Alert";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function CityDetailsPage() {
   const params = useParams();
@@ -16,38 +19,36 @@ export default function CityDetailsPage() {
   const [saving, setSaving] = useState(false);
   const [alertState, setAlertState] = useState<{ message: string; type: AlertType } | null>(null);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     async function fetchData() {
-      // 1. Fetch City
-      const { data: cityData } = await supabase.from("cities").select("*").eq("id", params.id).single();
-      setCity(cityData);
+      try {
+        setLoading(true);
+        const { data: cityData } = await supabase.from("cities").select("*").eq("id", params.id).single();
+        setCity(cityData);
 
-      // 2. Fetch Categories (Products only)
-      const { data: catData } = await supabase.from("categories").select("*").eq("type", "product").order("display_order");
-      setCategories(catData || []);
+        const { data: catData } = await supabase.from("categories").select("*").eq("type", "product").order("display_order");
+        setCategories(catData || []);
 
-      // 3. Fetch Budgets for this city
-      const { data: budgetData } = await supabase.from("budgets").select("*").eq("city_id", params.id);
-      setBudgets(budgetData || []);
-
-      setLoading(false);
+        const { data: budgetData } = await supabase.from("budgets").select("*").eq("city_id", params.id);
+        setBudgets(budgetData || []);
+      } catch (err) {
+          console.error(err);
+      } finally {
+          setLoading(false);
+      }
     }
     fetchData();
   }, [params.id, supabase]);
 
   const handlePriceChange = (budgetId: string, newPrice: string) => {
-    setBudgets(prev => prev.map(b => b.id === budgetId ? { ...b, price: parseFloat(newPrice) } : b));
+    setBudgets(prev => prev.map((b: any) => b.id === budgetId ? { ...b, price: parseFloat(newPrice) } : b));
   };
 
   const saveChanges = async () => {
     setSaving(true);
-    // Update all budgets
-    const updates = budgets.map(b => ({
+    const updates = budgets.map((b: any) => ({
         id: b.id,
         price: b.price
     }));
@@ -91,7 +92,7 @@ export default function CityDetailsPage() {
       </div>
 
       <div className="space-y-8">
-        {categories.map(cat => {
+        {categories.map((cat: any) => {
             const catBudgets = budgets.filter(b => b.category_id === cat.id).sort((a, b) => a.display_order - b.display_order);
             if (catBudgets.length === 0) return null;
 
@@ -102,7 +103,7 @@ export default function CityDetailsPage() {
                         <span className="text-[10px] uppercase tracking-widest text-stone-400">{cat.slug}</span>
                     </div>
                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {catBudgets.map(budget => (
+                        {catBudgets.map((budget: any) => (
                             <div key={budget.id} className="flex items-center justify-between p-4 border border-stone-100 rounded-lg hover:border-stone-300 transition">
                                 <span className="font-medium text-stone-700">{budget.label}</span>
                                 <div className="flex items-center gap-2">

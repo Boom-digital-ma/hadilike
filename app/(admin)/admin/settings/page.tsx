@@ -5,6 +5,9 @@ import { createBrowserClient } from "@supabase/ssr";
 import { Save, Loader2, MessageSquare, Megaphone, Star, X } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Alert, { AlertType } from "@/components/Alert";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>({});
@@ -12,10 +15,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [alertState, setAlertState] = useState<{ message: string; type: AlertType } | null>(null);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     async function fetchSettings() {
@@ -33,7 +33,7 @@ export default function SettingsPage() {
         if (error) throw error;
 
         const settingsMap: Record<string, any> = {};
-        data?.forEach((s) => (settingsMap[s.key] = s));
+        data?.forEach((s: any) => (settingsMap[s.key] = s));
         setSettings(settingsMap);
       } catch (err) {
         console.error("Error in fetchSettings:", err);

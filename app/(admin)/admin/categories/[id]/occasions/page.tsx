@@ -7,6 +7,8 @@ import { ArrowLeft, Edit, Save, Loader2, X, Plus, Trash2 } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Alert, { AlertType } from "@/components/Alert";
 
+export const dynamic = "force-dynamic";
+
 export default function OccasionsAdmin() {
   const params = useParams();
   const router = useRouter();
@@ -19,8 +21,8 @@ export default function OccasionsAdmin() {
   const [alertState, setAlertState] = useState<{ message: string; type: AlertType } | null>(null);
 
   const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
   );
 
   useEffect(() => {

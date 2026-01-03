@@ -6,6 +6,9 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Calendar, User, Phone, Mail, CreditCard, Box, MapPin, Clock, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function OrderDetailsPage() {
   const params = useParams();
@@ -14,10 +17,7 @@ export default function OrderDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseBrowserClient();
 
   const getWhatsAppLink = (phone: string, name: string) => {
     let formattedPhone = phone.replace(/\D/g, "");
@@ -40,8 +40,6 @@ export default function OrderDetailsPage() {
 
   useEffect(() => {
     async function fetchOrder() {
-      console.log("Fetching order ID:", params.id);
-      
       try {
         const { data, error } = await supabase
             .from("orders")
@@ -57,7 +55,6 @@ export default function OrderDetailsPage() {
             console.error("Supabase Error:", error);
             alert("Erreur chargement: " + error.message);
         } else {
-            console.log("Order loaded:", data);
             setOrder(data);
         }
       } catch (err: any) {

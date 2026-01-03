@@ -6,13 +6,15 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MessageCircle, Mail, Phone, User } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
   );
 
   useEffect(() => {

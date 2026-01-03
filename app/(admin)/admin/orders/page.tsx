@@ -14,6 +14,9 @@ import {
   Search,
   MessageCircle
 } from "lucide-react";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -22,10 +25,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     async function fetchData() {

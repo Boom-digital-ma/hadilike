@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { Star, Trash2, Eye, EyeOff, Plus, Save, X } from "lucide-react";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -12,10 +15,7 @@ export default function ReviewsPage() {
   // New Review State
   const [newReview, setNewReview] = useState({ author_name: "", content: "", rating: 5, is_visible: true });
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     async function fetchReviews() {

@@ -1,13 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+let supabaseClient: any = null;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Supabase credentials missing! Check your .env.local file.");
-}
+export const getSupabaseBrowserClient = () => {
+  if (supabaseClient) return supabaseClient;
 
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || ''
-);
+  supabaseClient = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  return supabaseClient;
+};
+
+// Instance statique pour compatibilité ascendante si besoin
+export const supabase = typeof window !== 'undefined' ? getSupabaseBrowserClient() : null;

@@ -35,8 +35,8 @@ export default function CategoryPage() {
         setOccasions(occData);
         
         // Filter images: inspiration for top slider, best_seller for coups de coeur
-        const sliders = imgData.filter(i => i.usage_type === 'inspiration' || i.usage_type === 'slider_hero').map(i => i.image_url);
-        const best = imgData.filter(i => i.usage_type === 'best_seller');
+        const sliders = imgData.filter((i: any) => i.usage_type === 'inspiration' || i.usage_type === 'slider_hero').map((i: any) => i.image_url);
+        const best = imgData.filter((i: any) => i.usage_type === 'best_seller');
         
         setSliderImages(sliders);
         setBestSellers(best);

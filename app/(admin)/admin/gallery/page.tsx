@@ -5,6 +5,9 @@ import { createBrowserClient } from "@supabase/ssr";
 import { Trash2, Plus, Image as ImageIcon, Loader2, X, Save, Edit } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Alert, { AlertType } from "@/components/Alert";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function GalleryPage() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -24,10 +27,7 @@ export default function GalleryPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     async function initPage() {
@@ -61,7 +61,7 @@ export default function GalleryPage() {
     if (selectedCategory) {
         setOccasions([]);
         setSelectedOccasion("all");
-        supabase.from("occasions").select("*").eq("category_id", selectedCategory).then(({ data }) => {
+        supabase.from("occasions").select("*").eq("category_id", selectedCategory).then(({ data }: any) => {
             setOccasions(data || []);
         });
     }
@@ -149,7 +149,7 @@ export default function GalleryPage() {
                 .select()
                 .single();
             if (error) throw error;
-            setImages(prev => prev.map(img => img.id === editingId ? data : img));
+            setImages(prev => prev.map((img: any) => img.id === editingId ? data : img));
             setAlertState({ message: "Média mis à jour !", type: "success" });
         } else {
             imageData.brand_id = brandData?.id;
@@ -176,7 +176,7 @@ export default function GalleryPage() {
     if (!confirm("Supprimer cette image ?")) return;
     const { error } = await supabase.from("gallery_images").delete().eq("id", id);
     if (!error) {
-        setImages(prev => prev.filter(img => img.id !== id));
+        setImages(prev => prev.filter((img: any) => img.id !== id));
         setCounts({ ...counts, [selectedCategory]: Math.max(0, (counts[selectedCategory] || 1) - 1) });
         if (editingId === id) cancelEdit();
         setAlertState({ message: "Média supprimé", type: "info" });
@@ -198,7 +198,7 @@ export default function GalleryPage() {
         {/* Sidebar Catégories */}
         <div className="w-full md:w-64 flex-shrink-0 space-y-2">
             <h3 className="text-xs font-bold uppercase text-stone-400 mb-4 tracking-widest text-center md:text-left">Catégories</h3>
-            {categories.map(cat => (
+            {categories.map((cat: any) => (
                 <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
@@ -229,7 +229,7 @@ export default function GalleryPage() {
                     className="p-2 border border-stone-200 rounded-lg text-sm bg-white outline-none focus:border-black transition"
                 >
                     <option value="all">Général (Toute la catégorie)</option>
-                    {occasions.map(occ => (
+                    {occasions.map((occ: any) => (
                         <option key={occ.id} value={occ.id}>{occ.label}</option>
                     ))}
                 </select>
@@ -334,7 +334,7 @@ export default function GalleryPage() {
                     <div className="text-center py-20 text-stone-400 font-serif">Chargement des médias...</div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {images.map((img) => (
+                        {images.map((img: any) => (
                             <div key={img.id} className="group relative aspect-square bg-white rounded-xl overflow-hidden border border-stone-200 shadow-sm transition-all hover:shadow-md">
                                 <img src={img.image_url} alt="" className="w-full h-full object-cover" />
                                 

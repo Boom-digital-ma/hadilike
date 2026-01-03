@@ -79,7 +79,7 @@ export async function getSiteSettings(brandId: string, cityId?: string) {
   
   // Transform array into a handy object
   const settings: Record<string, any> = {};
-  data.forEach(s => {
+  data.forEach((s: any) => {
     settings[s.key] = s.value;
   });
   return settings;

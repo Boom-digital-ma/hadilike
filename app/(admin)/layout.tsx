@@ -2,20 +2,22 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  MapPin, 
-  Settings, 
+import { useState, useEffect } from "react";
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  MapPin,
+  Settings,
   Star,
   Image as ImageIcon,
   FileText,
   Mail,
   Layout,
   LogOut,
-  Flower2
+  Flower2,
+  ShieldAlert
 } from "lucide-react";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
 
 export default function AdminLayout({
   children,
@@ -24,10 +26,33 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const [isAdmin, setIsAdmin] = useState(false); // Used to track super_admin status
+  
+  const supabase = getSupabaseBrowserClient();
+
+    useEffect(() => {
+
+      async function checkRole() {
+
+          const { data: { user } } = await supabase.auth.getUser();
+
+          if (user) {
+
+              const { data, error } = await supabase.from('brand_admins').select('role').eq('user_id', user.id).single();
+
+              if (data?.role === 'super_admin') {
+
+                  setIsAdmin(true);
+
+              }
+
+          }
+
+      }
+
+      checkRole();
+
+    }, [supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -80,7 +105,16 @@ export default function AdminLayout({
           })}
         </nav>
 
-        <div className="p-4 border-t border-stone-100">
+        <div className="p-4 border-t border-stone-100 space-y-2">
+          {isAdmin && (
+            <Link 
+                href="/superadmin/brands"
+                className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+            >
+                <ShieldAlert size={18} />
+                Super Admin
+            </Link>
+          )}
           <button 
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"

@@ -31,7 +31,7 @@ export default function OccasionPage() {
       ]).then(([styleData, imgData]) => {
         setStyles(styleData);
         // Take 'inspiration' images for the top slider
-        setSliderImages(imgData.filter(i => i.usage_type === 'inspiration' || i.usage_type === 'slider_hero').map(i => i.image_url));
+        setSliderImages(imgData.filter((i: any) => i.usage_type === 'inspiration' || i.usage_type === 'slider_hero').map((i: any) => i.image_url));
         setLoading(false);
       });
     } else if (categories.length > 0 && !config) {

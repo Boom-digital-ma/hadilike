@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { ShoppingBag, Mail, TrendingUp, Users } from "lucide-react";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ orders: 0, revenue: 0, leads: 0, customers: 0 });
   const [loading, setLoading] = useState(true);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     async function fetchStats() {
@@ -20,7 +20,7 @@ export default function AdminDashboard() {
         supabase.from("leads").select("*", { count: "exact" })
       ]);
 
-      const totalRevenue = ordersRes.data?.reduce((acc, curr) => acc + Number(curr.total_amount), 0) || 0;
+      const totalRevenue = ordersRes.data?.reduce((acc: number, curr: any) => acc + Number(curr.total_amount), 0) || 0;
 
       setStats({
         orders: ordersRes.count || 0,

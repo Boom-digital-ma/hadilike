@@ -22,12 +22,29 @@ export default function ServicePage() {
   const [formData, setFormData] = useState({ name: "", phone: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
 
-  const validatePhone = (phone: string) => /^(\+212|0)([ \-_/]*)(d[ \-_/]*){9}$/.test(phone);
+  const validatePhone = (phone: string) => /^(\+212|0)([ \-_/]*)(\d[ \-_/]*){9}$/.test(phone);
 
   // Find config by slug
   const serviceConfig = categories.find(c => c.slug === slug);
 
-  // ... (useEffect remains same)
+  useEffect(() => {
+    async function initService() {
+      if (serviceConfig && brand) {
+        try {
+          setLoading(true);
+          const imgData = await getGalleryImages(brand.id, serviceConfig.id);
+          setSliderImages(imgData.map((i: any) => i.image_url));
+        } catch (err) {
+          console.error("Error in initService:", err);
+        } finally {
+          setLoading(false);
+        }
+      } else if (categories.length > 0 && !serviceConfig) {
+          setLoading(false);
+      }
+    }
+    initService();
+  }, [serviceConfig, brand, categories]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

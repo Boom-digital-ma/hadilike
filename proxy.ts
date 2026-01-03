@@ -57,28 +57,36 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Protect /admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    // If accessing the login page (/admin)
-    if (request.nextUrl.pathname === '/admin') {
-      if (user) {
-        // If already logged in, redirect to dashboard
+  // 1. Protect /superadmin routes (highest level)
+  if (request.nextUrl.pathname.startsWith('/superadmin')) {
+    if (!user) return NextResponse.redirect(new URL('/admin', request.url));
+
+    // Check if user has super_admin role
+    const { data: adminData } = await supabase
+        .from('brand_admins')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+    if (!adminData || adminData.role !== 'super_admin') {
+        // Not a super admin, redirect to regular admin
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-      }
-      // Allow access to login page
+    }
+  }
+
+  // 2. Protect /admin routes
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    // ... rest of logic stays same but we can refine it
+    if (request.nextUrl.pathname === '/admin') {
+      if (user) return NextResponse.redirect(new URL('/admin/dashboard', request.url));
       return response;
     }
-
-    // If accessing protected admin routes (/admin/dashboard, etc.)
-    if (!user) {
-      // If not logged in, redirect to login page
-      return NextResponse.redirect(new URL('/admin', request.url));
-    }
+    if (!user) return NextResponse.redirect(new URL('/admin', request.url));
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/superadmin/:path*'],
 };

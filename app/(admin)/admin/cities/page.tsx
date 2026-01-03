@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { Plus, Edit, MapPin, X, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 export default function CitiesPage() {
   const [cities, setCities] = useState<any[]>([]);
@@ -12,10 +15,7 @@ export default function CitiesPage() {
   const [newCityName, setNewCityName] = useState("");
   const [creating, setCreating] = useState(false);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     fetchCities();
@@ -73,7 +73,7 @@ export default function CitiesPage() {
         if (categories) {
             const budgetsToInsert: any[] = [];
             
-            categories.forEach(cat => {
+            categories.forEach((cat: any) => {
                 // Default budgets structure
                 const defaults = [
                     { label: "Le Petit Geste", price: 400 },
@@ -82,7 +82,7 @@ export default function CitiesPage() {
                     { label: "La Folie", price: 1500 }
                 ];
 
-                defaults.forEach((def, idx) => {
+                defaults.forEach((def: any, idx: number) => {
                     budgetsToInsert.push({
                         brand_id: brandId,
                         city_id: cityData.id,
