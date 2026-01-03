@@ -1,6 +1,7 @@
 import Navigation from "@/components/Navigation";
 import Chatbot from "@/components/Chatbot";
 import Footer from "@/components/Footer";
+import GoogleTagManager from "@/components/GoogleTagManager";
 
 export default function ClientLayout({
   children,
@@ -9,6 +10,7 @@ export default function ClientLayout({
 }) {
   return (
     <div className="flex flex-col min-h-screen">
+      <GoogleTagManager />
       <Navigation />
       <div className="flex-grow">
         {children}

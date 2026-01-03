@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { Save, Loader2, MessageSquare, Megaphone, Star, X } from "lucide-react";
+import { Save, Loader2, MessageSquare, Megaphone, Star, X, Code } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Alert, { AlertType } from "@/components/Alert";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
@@ -208,6 +208,37 @@ export default function SettingsPage() {
                     className="w-full p-2 border border-stone-200 rounded outline-none focus:border-black"
                 />
                 <p className="text-[10px] text-stone-400 mt-1 italic">N'ajoutez pas de "+" ni d'espaces. Exemple: 212661223344</p>
+            </div>
+        </div>
+      </div>
+
+      {/* GOOGLE TAG MANAGER / ANALYTICS */}
+      <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Code size={18} className="text-stone-500" />
+            <h3 className="font-serif text-lg font-bold">Tracking & Analytics (GTM)</h3>
+          </div>
+          <button 
+            onClick={() => handleSave('gtm_config')}
+            className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center gap-2"
+          >
+            <Save size={14} /> Enregistrer
+          </button>
+        </div>
+        <div className="p-6 space-y-4">
+            <div>
+                <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">GTM Container ID</label>
+                <input 
+                    type="text" 
+                    placeholder="GTM-XXXXXXX"
+                    value={settings.gtm_config?.value?.containerId || ""} 
+                    onChange={(e) => updateSettingValue('gtm_config', { ...settings.gtm_config?.value, containerId: e.target.value })}
+                    className="w-full p-2 border border-stone-200 rounded outline-none focus:border-black font-mono text-sm"
+                />
+                <p className="text-[10px] text-stone-400 mt-1 italic">
+                    Entrez votre ID de conteneur Google Tag Manager. Tous vos pixels (Facebook, Google Analytics, etc.) doivent être gérés via GTM.
+                </p>
             </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { Plus, Globe, Settings, ShieldCheck, ExternalLink, Loader2, X } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -149,9 +150,11 @@ export default function SuperAdminBrands() {
                         </div>
 
                         <div className="pt-4 flex gap-2">
-                            <button className="flex-1 py-2 bg-stone-900 text-white rounded-lg text-xs font-bold hover:bg-black transition flex items-center justify-center gap-2">
-                                <Settings size={12} /> Configurer
-                            </button>
+                            <Link href={`/superadmin/brands/${brand.id}`} className="flex-1">
+                                <button className="w-full py-2 bg-stone-900 text-white rounded-lg text-xs font-bold hover:bg-black transition flex items-center justify-center gap-2">
+                                    <Settings size={12} /> Configurer
+                                </button>
+                            </Link>
                             <a 
                                 href={brand.domain ? `https://${brand.domain}` : '#'} 
                                 target="_blank"

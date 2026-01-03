@@ -37,10 +37,10 @@ export default function SuperAdminLayout({
     <div className="min-h-screen bg-stone-50 flex">
       {/* Super Sidebar - Pure Black theme */}
       <aside className="w-64 bg-brand-black text-white flex flex-col fixed h-full shadow-xl">
-        <div className="p-6 border-b border-white/5 flex items-center gap-2">
+        <Link href="/superadmin" className="p-6 border-b border-white/5 flex items-center gap-2 hover:bg-white/5 transition-colors">
           <ShieldCheck className="text-white w-6 h-6" />
           <span className="font-serif text-lg font-bold tracking-tighter uppercase">Hadilike SAAS</span>
-        </div>
+        </Link>
 
         <nav className="flex-grow p-4 space-y-2 mt-4">
           {menuItems.map((item) => {
