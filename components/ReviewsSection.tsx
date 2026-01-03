@@ -25,7 +25,7 @@ export default function ReviewsSection() {
         <div className="w-16 h-px bg-stone-300 mx-auto"></div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 max-w-2xl mx-auto">
         {reviews.map((review) => (
           <div 
             key={review.id} 
