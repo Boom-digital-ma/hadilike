@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { useOrder } from "@/context/OrderContext";
 import { useBrand } from "@/context/BrandContext";
 import { useState, useEffect } from "react";
-import { getStyles, getGalleryImages } from "@/lib/api";
+import { getStyles, getGalleryImages, getOccasions } from "@/lib/api";
 import ImageSlider from "@/components/ImageSlider";
 
 export default function OccasionPage() {
@@ -27,17 +27,24 @@ export default function OccasionPage() {
     if (brand && config) {
       Promise.all([
         getStyles(brand.id),
-        getGalleryImages(brand.id, config.id)
-      ]).then(([styleData, imgData]) => {
+        getOccasions(brand.id, config.id)
+      ]).then(([styleData, occasionData]) => {
         setStyles(styleData);
-        // Take 'inspiration' images for the top slider
-        setSliderImages(imgData.filter((i: any) => i.usage_type === 'inspiration' || i.usage_type === 'slider_hero').map((i: any) => i.image_url));
-        setLoading(false);
+
+        // Find current occasion to filter images
+        const currentOccasion = occasionData.find((o: any) => o.slug === occasionSlug);
+        const occasionId = currentOccasion ? currentOccasion.id : undefined;
+
+        getGalleryImages(brand.id, config.id, occasionId).then((imgData) => {
+            // Take 'inspiration' images for the top slider
+            setSliderImages(imgData.filter((i: any) => i.usage_type === 'inspiration' || i.usage_type === 'slider_hero').map((i: any) => i.image_url));
+            setLoading(false);
+        });
       });
     } else if (categories.length > 0 && !config) {
         setLoading(false);
     }
-  }, [brand, categories, config]);
+  }, [brand, categories, config, occasionSlug]);
 
   if (!loading && !config) {
     notFound();

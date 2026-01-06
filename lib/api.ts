@@ -101,7 +101,7 @@ export async function getReviews(brandId: string, cityId?: string) {
   return data;
 }
 
-export async function getGalleryImages(brandId: string, categoryId?: string) {
+export async function getGalleryImages(brandId: string, categoryId?: string, occasionId?: string) {
   let query = supabase
     .from('gallery_images')
     .select('*')
@@ -109,6 +109,10 @@ export async function getGalleryImages(brandId: string, categoryId?: string) {
 
   if (categoryId) {
     query = query.eq('category_id', categoryId);
+  }
+
+  if (occasionId) {
+    query = query.eq('occasion_id', occasionId);
   }
 
   const { data, error } = await query.order('display_order');
