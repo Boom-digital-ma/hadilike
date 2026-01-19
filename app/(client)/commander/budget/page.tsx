@@ -30,7 +30,11 @@ export default function BudgetPage() {
   }, [brand, currentCity, config, categories]);
 
   const handleBudgetSelect = (budget: any) => {
-    setOrder(prev => ({ ...prev, budget: `${budget.price} ${currentCity?.currency_symbol || 'DH'}` }));
+    setOrder(prev => ({ 
+      ...prev, 
+      budget: `${budget.price} ${currentCity?.currency_symbol || 'DH'}`,
+      isBudgetFlow: true 
+    }));
     router.push("/commander/details");
   };
 

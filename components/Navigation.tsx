@@ -34,23 +34,25 @@ export default function Navigation() {
     router.push(path);
   };
 
-  const handleManualOrder = async () => {
+  const handleManualOrder = async (overrideMethod?: 'paypal' | 'western' | 'cod') => {
     if (!customerDetails.name || !customerDetails.phone) {
         setAlert({ message: "Veuillez remplir vos coordonnées (Nom et Tél/WhatsApp)", type: 'error' });
         return;
     }
+
+    const finalMethod = overrideMethod || paymentMethod;
 
     const orderData = {
         brandId: brand.id,
         cityId: currentCity.id,
         cart: cart,
         total: calculateTotal(),
-        method: paymentMethod,
+        method: finalMethod,
         customer: {
             name: { given_name: customerDetails.name, surname: "" },
             phone: { phone_number: { national_number: customerDetails.phone } }
         },
-        status: paymentMethod === 'cod' ? 'PENDING_COD' : 'PENDING_WESTERN_UNION'
+        status: finalMethod === 'cod' ? 'PENDING_COD' : 'PENDING_WESTERN_UNION'
     };
     
     const result = await saveOrder(orderData);
@@ -75,6 +77,7 @@ export default function Navigation() {
   };
 
   const logoUrl = brand?.theme_config?.logo_url || "/images/logo-new.jpeg";
+  const hasBudgetFlowItem = cart.some(item => item.isBudgetFlow);
 
   return (
     <>
@@ -195,117 +198,154 @@ export default function Navigation() {
             
             {cart.length > 0 && (
                 <div className="w-full">
-                     <div className="mb-6 space-y-3">
-                        <label className={`flex items-center space-x-3 p-3 rounded border cursor-pointer transition ${paymentMethod === 'paypal' ? 'border-brand-black bg-stone-50' : 'border-stone-200 hover:bg-stone-50'}`}>
-                            <input type="radio" name="payment" className="accent-brand-black" checked={paymentMethod === 'paypal'} onChange={() => setPaymentMethod('paypal')} />
-                            <CreditCard className="w-5 h-5 text-stone-600" />
-                            <span className="text-sm font-medium">PayPal / Carte Bancaire</span>
-                        </label>
-                        <label className={`flex items-center space-x-3 p-3 rounded border cursor-pointer transition ${paymentMethod === 'western' ? 'border-brand-black bg-stone-50' : 'border-stone-200 hover:bg-stone-50'}`}>
-                            <input type="radio" name="payment" className="accent-brand-black" checked={paymentMethod === 'western'} onChange={() => setPaymentMethod('western')} />
-                            <Landmark className="w-5 h-5 text-stone-600" />
-                            <span className="text-sm font-medium">Cash Plus</span>
-                        </label>
-                         <label className={`flex items-center space-x-3 p-3 rounded border cursor-pointer transition ${paymentMethod === 'cod' ? 'border-brand-black bg-stone-50' : 'border-stone-200 hover:bg-stone-50'}`}>
-                            <input type="radio" name="payment" className="accent-brand-black" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
-                            <Banknote className="w-5 h-5 text-stone-600" />
-                            <span className="text-sm font-medium">Paiement à la livraison</span>
-                        </label>
-                     </div>
+                     {hasBudgetFlowItem ? (
+                        <div className="space-y-6">
+                            <div className="space-y-4 bg-stone-50 p-4 rounded border border-stone-200 animate-in fade-in slide-in-from-top-2">
+                                <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-2">Vos coordonnées</p>
+                                <input 
+                                    type="text" 
+                                    placeholder="Votre Nom complet" 
+                                    className="w-full p-3 text-sm border border-stone-300 rounded focus:border-brand-black focus:ring-0 outline-none bg-white"
+                                    value={customerDetails.name}
+                                    onChange={(e) => setCustomerDetails({...customerDetails, name: e.target.value})}
+                                />
+                                <input 
+                                    type="tel" 
+                                    placeholder="Téléphone / WhatsApp" 
+                                    className="w-full p-3 text-sm border border-stone-300 rounded focus:border-brand-black focus:ring-0 outline-none bg-white"
+                                    value={customerDetails.phone}
+                                    onChange={(e) => setCustomerDetails({...customerDetails, phone: e.target.value})}
+                                />
+                            </div>
 
-                     {paymentMethod !== 'paypal' && (
-                        <div className="mb-6 space-y-4 bg-stone-50 p-4 rounded border border-stone-200 animate-in fade-in slide-in-from-top-2">
-                             <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-2">Vos coordonnées</p>
-                             <input 
-                                type="text" 
-                                placeholder="Votre Nom complet" 
-                                className="w-full p-3 text-sm border border-stone-300 rounded focus:border-brand-black focus:ring-0 outline-none"
-                                value={customerDetails.name}
-                                onChange={(e) => setCustomerDetails({...customerDetails, name: e.target.value})}
-                             />
-                             <input 
-                                type="tel" 
-                                placeholder="Téléphone / WhatsApp" 
-                                className="w-full p-3 text-sm border border-stone-300 rounded focus:border-brand-black focus:ring-0 outline-none"
-                                value={customerDetails.phone}
-                                onChange={(e) => setCustomerDetails({...customerDetails, phone: e.target.value})}
-                             />
+                            <div className="bg-stone-50 p-4 rounded text-center border border-stone-200">
+                                <p className="text-sm font-serif mb-2 text-stone-800">Confirmation de commande</p>
+                                <p className="text-xs text-stone-500 mb-4">
+                                    Votre création sur-mesure sera validée par notre atelier. Vous recevrez une photo réelle sur WhatsApp avant livraison.
+                                </p>
+                                <button 
+                                    onClick={() => handleManualOrder('budget' as any)} 
+                                    className="w-full py-4 bg-brand-black text-white text-xs uppercase tracking-widest rounded-full font-serif text-lg hover:bg-stone-800 transition shadow-lg"
+                                >
+                                    Confirmer la commande
+                                </button>
+                            </div>
                         </div>
-                     )}
+                     ) : (
+                        <>
+                            <div className="mb-6 space-y-3">
+                                <label className={`flex items-center space-x-3 p-3 rounded border cursor-pointer transition ${paymentMethod === 'paypal' ? 'border-brand-black bg-stone-50' : 'border-stone-200 hover:bg-stone-50'}`}>
+                                    <input type="radio" name="payment" className="accent-brand-black" checked={paymentMethod === 'paypal'} onChange={() => setPaymentMethod('paypal')} />
+                                    <CreditCard className="w-5 h-5 text-stone-600" />
+                                    <span className="text-sm font-medium">PayPal / Carte Bancaire</span>
+                                </label>
+                                <label className={`flex items-center space-x-3 p-3 rounded border cursor-pointer transition ${paymentMethod === 'western' ? 'border-brand-black bg-stone-50' : 'border-stone-200 hover:bg-stone-50'}`}>
+                                    <input type="radio" name="payment" className="accent-brand-black" checked={paymentMethod === 'western'} onChange={() => setPaymentMethod('western')} />
+                                    <Landmark className="w-5 h-5 text-stone-600" />
+                                    <span className="text-sm font-medium">Cash Plus</span>
+                                </label>
+                                <label className={`flex items-center space-x-3 p-3 rounded border cursor-pointer transition ${paymentMethod === 'cod' ? 'border-brand-black bg-stone-50' : 'border-stone-200 hover:bg-stone-50'}`}>
+                                    <input type="radio" name="payment" className="accent-brand-black" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
+                                    <Banknote className="w-5 h-5 text-stone-600" />
+                                    <span className="text-sm font-medium">Paiement à la livraison</span>
+                                </label>
+                            </div>
 
-                     {paymentMethod === 'paypal' && (
-                        <PayPalButtons 
-                            style={{ layout: "vertical", shape: "rect" }}
-                            createOrder={(data, actions) => {
-                                const totalAmount = calculateTotal();
-                                return actions.order.create({
-                                    intent: "CAPTURE", 
-                                    purchase_units: [
-                                        {
-                                            description: "Commande Hadilike Fleurs",
-                                            amount: {
-                                                currency_code: "EUR",
-                                                value: (totalAmount * 0.1).toFixed(2) 
-                                            },
-                                        },
-                                    ],
-                                });
-                            }}
-                            onApprove={async (data, actions) => {
-                                if (actions.order) {
-                                    const details = await actions.order.capture();
-                                    const orderData = {
-                                        brandId: brand.id,
-                                        cityId: currentCity.id,
-                                        paypalId: details.id,
-                                        cart: cart,
-                                        total: calculateTotal(),
-                                        customer: details.payer,
-                                        status: 'PAID'
-                                    };
-                                    
-                                    const result = await saveOrder(orderData);
-                                    
-                                    if (result.success) {
-                                        clearCart();
-                                        setIsCartOpen(false);
-                                        const params = new URLSearchParams({
-                                            id: details.id || '',
-                                            name: details.payer?.name?.given_name || '',
-                                            total: calculateTotal().toString(),
-                                            method: 'paypal'
+                            {paymentMethod !== 'paypal' && (
+                                <div className="mb-6 space-y-4 bg-stone-50 p-4 rounded border border-stone-200 animate-in fade-in slide-in-from-top-2">
+                                    <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-2">Vos coordonnées</p>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Votre Nom complet" 
+                                        className="w-full p-3 text-sm border border-stone-300 rounded focus:border-brand-black focus:ring-0 outline-none bg-white"
+                                        value={customerDetails.name}
+                                        onChange={(e) => setCustomerDetails({...customerDetails, name: e.target.value})}
+                                    />
+                                    <input 
+                                        type="tel" 
+                                        placeholder="Téléphone / WhatsApp" 
+                                        className="w-full p-3 text-sm border border-stone-300 rounded focus:border-brand-black focus:ring-0 outline-none bg-white"
+                                        value={customerDetails.phone}
+                                        onChange={(e) => setCustomerDetails({...customerDetails, phone: e.target.value})}
+                                    />
+                                </div>
+                            )}
+
+                            {paymentMethod === 'paypal' && (
+                                <PayPalButtons 
+                                    style={{ layout: "vertical", shape: "rect" }}
+                                    createOrder={(data, actions) => {
+                                        const totalAmount = calculateTotal();
+                                        return actions.order.create({
+                                            intent: "CAPTURE", 
+                                            purchase_units: [
+                                                {
+                                                    description: "Commande Hadilike Fleurs",
+                                                    amount: {
+                                                        currency_code: "EUR",
+                                                        value: (totalAmount * 0.1).toFixed(2) 
+                                                    },
+                                                },
+                                            ],
                                         });
-                                        router.push(`/commander/success?${params.toString()}`);
-                                    } else {
-                                        setAlert({ message: "Erreur lors de la sauvegarde de la commande.", type: 'error' });
-                                    }
-                                }
-                            }}
-                        />
-                     )}
+                                    }}
+                                    onApprove={async (data, actions) => {
+                                        if (actions.order) {
+                                            const details = await actions.order.capture();
+                                            const orderData = {
+                                                brandId: brand.id,
+                                                cityId: currentCity.id,
+                                                paypalId: details.id,
+                                                cart: cart,
+                                                total: calculateTotal(),
+                                                customer: details.payer,
+                                                status: 'PAID'
+                                            };
+                                            
+                                            const result = await saveOrder(orderData);
+                                            
+                                            if (result.success) {
+                                                clearCart();
+                                                setIsCartOpen(false);
+                                                const params = new URLSearchParams({
+                                                    id: details.id || '',
+                                                    name: details.payer?.name?.given_name || '',
+                                                    total: calculateTotal().toString(),
+                                                    method: 'paypal'
+                                                });
+                                                router.push(`/commander/success?${params.toString()}`);
+                                            } else {
+                                                setAlert({ message: "Erreur lors de la sauvegarde de la commande.", type: 'error' });
+                                            }
+                                        }
+                                    }}
+                                />
+                            )}
 
-                     {paymentMethod === 'western' && (
-                        <div className="bg-stone-50 p-4 rounded text-center border border-stone-200">
-                             <p className="text-sm font-serif mb-2 text-stone-800">Transfert Cash Plus</p>
-                             <p className="text-xs text-stone-500 mb-4">
-                                Validez votre commande pour recevoir les coordonnées de transfert par email/WhatsApp.
-                             </p>
-                             <button onClick={handleManualOrder} className="w-full py-3 bg-brand-black text-white text-xs uppercase tracking-widest rounded hover:bg-stone-800 transition">
-                                Confirmer la commande
-                             </button>
-                        </div>
-                     )}
+                            {paymentMethod === 'western' && (
+                                <div className="bg-stone-50 p-4 rounded text-center border border-stone-200">
+                                    <p className="text-sm font-serif mb-2 text-stone-800">Transfert Cash Plus</p>
+                                    <p className="text-xs text-stone-500 mb-4">
+                                        Validez votre commande pour recevoir les coordonnées de transfert par email/WhatsApp.
+                                    </p>
+                                    <button onClick={() => handleManualOrder()} className="w-full py-3 bg-brand-black text-white text-xs uppercase tracking-widest rounded hover:bg-stone-800 transition">
+                                        Confirmer la commande
+                                    </button>
+                                </div>
+                            )}
 
-                     {paymentMethod === 'cod' && (
-                         <div className="bg-stone-50 p-4 rounded text-center border border-stone-200">
-                             <p className="text-sm font-serif mb-2 text-stone-800">Paiement à la livraison</p>
-                             <p className="text-xs text-stone-500 mb-4">
-                                Réglez votre commande en espèces directement auprès du livreur.
-                             </p>
-                             <button onClick={handleManualOrder} className="w-full py-3 bg-brand-black text-white text-xs uppercase tracking-widest rounded hover:bg-stone-800 transition">
-                                Confirmer la commande
-                             </button>
-                        </div>
+                            {paymentMethod === 'cod' && (
+                                <div className="bg-stone-50 p-4 rounded text-center border border-stone-200">
+                                    <p className="text-sm font-serif mb-2 text-stone-800">Paiement à la livraison</p>
+                                    <p className="text-xs text-stone-500 mb-4">
+                                        Réglez votre commande en espèces directement auprès du livreur.
+                                    </p>
+                                    <button onClick={() => handleManualOrder()} className="w-full py-3 bg-brand-black text-white text-xs uppercase tracking-widest rounded hover:bg-stone-800 transition">
+                                        Confirmer la commande
+                                    </button>
+                                </div>
+                            )}
+                        </>
                      )}
 
                      <div className="mt-6 space-y-2 text-center">

@@ -66,7 +66,8 @@ export default function CategoryPage() {
         specialRequest: "",
         message: "",
         date: "",
-        slot: ""
+        slot: "",
+        isBudgetFlow: false
     });
     const encodedImg = encodeURIComponent(imgData.image_url);
     router.push(`/commander/preview?img=${encodedImg}`);
@@ -86,7 +87,7 @@ export default function CategoryPage() {
       {/* Case 1: Direct Flow (Composition Spéciale) */}
       {config.flow === "direct" ? (
         <div className="space-y-8">
-            {sliderImages.length > 0 && <ImageSlider images={sliderImages} />}
+            {sliderImages.length > 0 && <ImageSlider images={sliderImages} autoPlay={false} allowZoom={true} />}
 
             <h3 className="font-serif text-3xl mb-2">{config.title}</h3>
             <p className="text-stone-500 italic text-sm mb-8">

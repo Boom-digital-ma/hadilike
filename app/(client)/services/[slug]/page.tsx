@@ -96,7 +96,7 @@ export default function ServicePage() {
         <ArrowLeft className="w-4 h-4" /> Retour Accueil
       </Link>
 
-      {sliderImages.length > 0 && <ImageSlider images={sliderImages} />}
+      {sliderImages.length > 0 && <ImageSlider images={sliderImages} autoPlay={false} allowZoom={true} />}
 
       <h2 className="font-serif text-3xl mb-2">{serviceConfig.title}</h2>
       <p className="text-stone-600 mb-6 italic text-sm">

@@ -13,6 +13,7 @@ export type WizardState = {
   message: string;
   date: string;
   slot: string;
+  isBudgetFlow?: boolean;
 };
 
 interface CartContextType {

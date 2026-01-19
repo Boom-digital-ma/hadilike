@@ -22,7 +22,7 @@ function SuccessContent() {
                     `*Référence :* #${orderId?.slice(0, 8)}\n` +
                     `*Nom :* ${name}\n` +
                     `*Montant :* ${total} DH\n` +
-                    `*Paiement :* ${method === 'cod' ? 'À la livraison' : method === 'western' ? 'Cash Plus' : 'PayPal'}\n\n` +
+                    `*Paiement :* ${method === 'cod' ? 'À la livraison' : method === 'western' ? 'Cash Plus' : method === 'budget' ? 'Sur mesure (à valider)' : 'PayPal'}\n\n` +
                     `Pouvez-vous me confirmer la bonne réception ? Merci !`;
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   };

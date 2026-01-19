@@ -84,7 +84,7 @@ export default function OrderSummaryPage() {
       </button>
 
       <p className="mt-6 text-center text-[10px] text-stone-400 uppercase tracking-widest">
-        Paiement sécurisé à l'étape suivante
+        {order.isBudgetFlow ? "Validation de commande à l'étape suivante" : "Paiement sécurisé à l'étape suivante"}
       </p>
     </div>
   );
