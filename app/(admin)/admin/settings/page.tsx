@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { Save, Loader2, MessageSquare, Megaphone, Star, X, Code } from "lucide-react";
+import { Save, Loader2, MessageSquare, Megaphone, Star, X, Code, CreditCard } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Alert, { AlertType } from "@/components/Alert";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>({});
+  const [brandId, setBrandId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [alertState, setAlertState] = useState<{ message: string; type: AlertType } | null>(null);
@@ -24,6 +25,7 @@ export default function SettingsPage() {
         // Get brand ID first
         const { data: brandData } = await supabase.from("brands").select("id").limit(1).single();
         if (!brandData) throw new Error("Marque non trouvée");
+        setBrandId(brandData.id);
 
         const { data, error } = await supabase
             .from("site_settings")
@@ -56,9 +58,18 @@ export default function SettingsPage() {
   const handleSave = async (key: string) => {
     setSaving(true);
     const setting = settings[key];
+    
+    // Construct payload, ensuring brand_id is present
+    const payload = {
+        id: setting?.id, // undefined if new
+        key: key,
+        value: setting?.value || {},
+        brand_id: setting?.brand_id || brandId
+    };
+
     const { error } = await supabase
       .from("site_settings")
-      .upsert({ id: setting.id, key: setting.key, value: setting.value, brand_id: setting.brand_id });
+      .upsert(payload, { onConflict: 'brand_id, city_id, key' });
 
     if (error) {
         setAlertState({ message: "Erreur: " + error.message, type: "error" });
@@ -238,6 +249,47 @@ export default function SettingsPage() {
                 />
                 <p className="text-[10px] text-stone-400 mt-1 italic">
                     Entrez votre ID de conteneur Google Tag Manager. Tous vos pixels (Facebook, Google Analytics, etc.) doivent être gérés via GTM.
+                </p>
+            </div>
+        </div>
+      </div>
+      {/* PAYPAL CONFIG */}
+      <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <CreditCard size={18} className="text-stone-500" />
+            <h3 className="font-serif text-lg font-bold">Paiement (PayPal)</h3>
+          </div>
+          <button 
+            onClick={() => handleSave('paypal_config')}
+            className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center gap-2"
+          >
+            <Save size={14} /> Enregistrer
+          </button>
+        </div>
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Client ID (Live/Sandbox)</label>
+                <input 
+                    type="text" 
+                    placeholder="AbC..."
+                    value={settings.paypal_config?.value?.client_id || ""} 
+                    onChange={(e) => updateSettingValue('paypal_config', { ...settings.paypal_config?.value, client_id: e.target.value })}
+                    className="w-full p-2 border border-stone-200 rounded outline-none focus:border-black font-mono text-sm"
+                />
+            </div>
+            <div>
+                <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Devise</label>
+                <select 
+                    value={settings.paypal_config?.value?.currency || "EUR"} 
+                    onChange={(e) => updateSettingValue('paypal_config', { ...settings.paypal_config?.value, currency: e.target.value })}
+                    className="w-full p-2 border border-stone-200 rounded outline-none focus:border-black"
+                >
+                    <option value="EUR">EUR (€)</option>
+                    <option value="USD">USD ($)</option>
+                </select>
+                <p className="text-[10px] text-stone-400 mt-1 italic">
+                    Note: Le MAD n'est pas directement supporté par PayPal. Utilisez EUR ou USD.
                 </p>
             </div>
         </div>
