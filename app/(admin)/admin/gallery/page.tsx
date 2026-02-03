@@ -338,7 +338,7 @@ export default function GalleryPage() {
                             <div key={img.id} className="group relative aspect-square bg-white rounded-xl overflow-hidden border border-stone-200 shadow-sm transition-all hover:shadow-md">
                                 <img src={img.image_url} alt="" className="w-full h-full object-cover" />
                                 
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
+                                <div className="absolute inset-0 bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
                                     <div className="flex justify-between items-start">
                                         <span className={`px-2 py-1 rounded text-[9px] font-bold uppercase tracking-tighter ${
                                             img.usage_type === 'best_seller' ? 'bg-yellow-400 text-black' : 'bg-white/20 text-white'
