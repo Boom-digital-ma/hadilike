@@ -33,14 +33,17 @@ export default function LeadsPage() {
 
   return (
     <div className="space-y-8 pb-20">
-      <div>
-        <h2 className="font-serif text-3xl">Demandes de Contact</h2>
-        <p className="text-stone-500 text-sm">Suivi des prospects (Wedding, Corporate, Contact).</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="font-serif text-3xl">Demandes de Contact</h2>
+          <p className="text-stone-500 text-sm">Suivi des prospects (Wedding, Corporate, Contact).</p>
+        </div>
       </div>
 
       <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-stone-50 border-b border-stone-200 text-[10px] uppercase tracking-widest text-stone-500 font-bold">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[800px]">
+            <thead className="bg-stone-50 border-b border-stone-200 text-[10px] uppercase tracking-widest text-stone-500 font-bold">
             <tr>
               <th className="px-6 py-4">Date</th>
               <th className="px-6 py-4">Nom</th>
@@ -92,5 +95,6 @@ export default function LeadsPage() {
         </table>
       </div>
     </div>
-  );
+  </div>
+);
 }

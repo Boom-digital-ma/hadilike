@@ -88,14 +88,14 @@ export default function ReviewsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="font-serif text-3xl">Avis Clients</h2>
           <p className="text-stone-500 text-sm">Gérez les témoignages affichés sur le site.</p>
         </div>
         <button 
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-black text-white rounded-lg flex items-center gap-2 hover:bg-stone-800 transition shadow-md"
+            className="px-4 py-2 bg-black text-white rounded-lg flex items-center gap-2 hover:bg-stone-800 transition shadow-md w-full sm:w-auto justify-center"
         >
           <Plus size={18} />
           Ajouter un avis
@@ -103,8 +103,9 @@ export default function ReviewsPage() {
       </div>
 
       <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-stone-50 border-b border-stone-200 text-[10px] uppercase tracking-widest text-stone-500 font-bold">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[800px]">
+            <thead className="bg-stone-50 border-b border-stone-200 text-[10px] uppercase tracking-widest text-stone-500 font-bold">
             <tr>
               <th className="px-6 py-4">Client</th>
               <th className="px-6 py-4">Note</th>
@@ -157,6 +158,7 @@ export default function ReviewsPage() {
           </tbody>
         </table>
       </div>
+    </div>
 
       {/* Modal Ajout */}
       {isModalOpen && (
