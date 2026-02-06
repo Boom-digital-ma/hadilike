@@ -91,13 +91,13 @@ export default function SettingsPage() {
 
       {/* PROMO POPUP */}
       <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex justify-between items-center">
+        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <Megaphone size={18} className="text-stone-500" />
             <h3 className="font-serif text-lg font-bold">Modal Publicitaire</h3>
           </div>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+            <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded border border-stone-200 sm:border-none">
                 <input 
                     type="checkbox" 
                     checked={settings.promo_popup?.value?.enabled} 
@@ -108,7 +108,7 @@ export default function SettingsPage() {
             </label>
             <button 
                 onClick={() => handleSave('promo_popup')}
-                className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center gap-2"
+                className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center justify-center gap-2"
             >
                 <Save size={14} /> Enregistrer
             </button>
@@ -161,13 +161,13 @@ export default function SettingsPage() {
 
       {/* CHATBOT */}
       <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex justify-between items-center">
+        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <MessageSquare size={18} className="text-stone-500" />
             <h3 className="font-serif text-lg font-bold">Chatbot Conciergerie</h3>
           </div>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+            <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded border border-stone-200 sm:border-none">
                 <input 
                     type="checkbox" 
                     checked={settings.chatbot_config?.value?.enabled} 
@@ -178,7 +178,7 @@ export default function SettingsPage() {
             </label>
             <button 
                 onClick={() => handleSave('chatbot_config')}
-                className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center gap-2"
+                className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center justify-center gap-2"
             >
                 <Save size={14} /> Enregistrer
             </button>
@@ -191,19 +191,52 @@ export default function SettingsPage() {
 
       {/* REVIEWS */}
       <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-        {/* ... (existing reviews config) */}
+        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Star size={18} className="text-stone-500" />
+            <h3 className="font-serif text-lg font-bold">Section Témoignages</h3>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+            <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded border border-stone-200 sm:border-none">
+                <input 
+                    type="checkbox" 
+                    checked={settings.reviews_config?.value?.enabled} 
+                    onChange={(e) => updateSettingValue('reviews_config', { ...settings.reviews_config.value, enabled: e.target.checked })}
+                    className="w-4 h-4 accent-black"
+                />
+                <span className="text-sm font-medium">Activé</span>
+            </label>
+            <button 
+                onClick={() => handleSave('reviews_config')}
+                className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center justify-center gap-2"
+            >
+                <Save size={14} /> Enregistrer
+            </button>
+          </div>
+        </div>
+        <div className="p-6">
+            <div className="max-w-md">
+                <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Titre de la section</label>
+                <input 
+                    type="text" 
+                    value={settings.reviews_config?.value?.title || ""} 
+                    onChange={(e) => updateSettingValue('reviews_config', { ...settings.reviews_config.value, title: e.target.value })}
+                    className="w-full p-2 border border-stone-200 rounded outline-none focus:border-black"
+                />
+            </div>
+        </div>
       </div>
 
       {/* WHATSAPP & CONTACT */}
       <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex justify-between items-center">
+        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <MessageSquare size={18} className="text-stone-500" />
             <h3 className="font-serif text-lg font-bold">Contact & WhatsApp</h3>
           </div>
           <button 
             onClick={() => handleSave('whatsapp_config')}
-            className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center gap-2"
+            className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <Save size={14} /> Enregistrer
           </button>
@@ -225,14 +258,14 @@ export default function SettingsPage() {
 
       {/* GOOGLE TAG MANAGER / ANALYTICS */}
       <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex justify-between items-center">
+        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <Code size={18} className="text-stone-500" />
             <h3 className="font-serif text-lg font-bold">Tracking & Analytics (GTM)</h3>
           </div>
           <button 
             onClick={() => handleSave('gtm_config')}
-            className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center gap-2"
+            className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <Save size={14} /> Enregistrer
           </button>
@@ -255,14 +288,14 @@ export default function SettingsPage() {
       </div>
       {/* PAYPAL CONFIG */}
       <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex justify-between items-center">
+        <div className="bg-stone-50 px-6 py-4 border-b border-stone-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <CreditCard size={18} className="text-stone-500" />
             <h3 className="font-serif text-lg font-bold">Paiement (PayPal)</h3>
           </div>
           <button 
             onClick={() => handleSave('paypal_config')}
-            className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center gap-2"
+            className="px-4 py-2 bg-black text-white text-xs rounded hover:bg-stone-800 transition flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <Save size={14} /> Enregistrer
           </button>
