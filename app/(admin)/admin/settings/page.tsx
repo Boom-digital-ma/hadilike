@@ -61,19 +61,24 @@ export default function SettingsPage() {
     
     // Construct payload, ensuring brand_id is present
     const payload = {
-        id: setting?.id, // undefined if new
+        ...setting,
         key: key,
         value: setting?.value || {},
         brand_id: setting?.brand_id || brandId
     };
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("site_settings")
-      .upsert(payload, { onConflict: 'brand_id, city_id, key' });
+      .upsert(payload)
+      .select()
+      .single();
 
     if (error) {
         setAlertState({ message: "Erreur: " + error.message, type: "error" });
     } else {
+        if (data) {
+            setSettings((prev: any) => ({ ...prev, [key]: data }));
+        }
         setAlertState({ message: "Réglage mis à jour avec succès !", type: "success" });
     }
     setSaving(false);
